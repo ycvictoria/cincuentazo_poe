@@ -1,16 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
-
 <?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.cincuentazo.HelloController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.TextFlow?>
 
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+<SplitPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.typewordsgame.controllers.GameController">
+  <items>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+         <children>
+            <VBox layoutX="-7.0" layoutY="-5.0" prefHeight="406.0" prefWidth="616.0">
+               <children>
+                  <Pane prefHeight="64.0" prefWidth="616.0" style="-fx-background-color: #ffdd47;">
+                     <children>
+                        <Label layoutX="20.0" layoutY="16.0" prefHeight="31.0" prefWidth="296.0" style="-fx-background-color: #ffdd47;" text="Juega, Tipea rápido !!" textFill="#3a364a">
+                           <font>
+                              <Font name="Cambria Bold" size="29.0" />
+                           </font>
+                        </Label>
+                        <Label layoutX="333.0" layoutY="17.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="nicknameLabel" layoutX="461.0" layoutY="17.0" prefHeight="30.0" prefWidth="117.0" text="a" textFill="#1d839d">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="nicknameLabel1" layoutX="364.0" layoutY="16.0" prefHeight="30.0" prefWidth="117.0" text="Jugador: " textFill="#1d839d">
+                           <font>
+                              <Font size="22.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </Pane>
+                  <Pane prefHeight="53.0" prefWidth="616.0">
+                     <children>
+                        <Label layoutX="60.0" layoutY="14.0" text="Niveles completados:">
+                           <font>
+                              <Font name="Cambria" size="17.0" />
+                           </font></Label>
+                        <Button fx:id="restartButton" layoutX="438.0" layoutY="11.0" mnemonicParsing="false" onAction="#restartGameAction" prefHeight="25.0" prefWidth="105.0" text="Reiniciar Juego" />
+                        <Label fx:id="completeLevelLabel" layoutX="224.0" layoutY="9.0" prefHeight="30.0" prefWidth="46.0" text="0">
+                           <font>
+                              <Font name="Cambria Math" size="26.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </Pane>
+                  <Pane prefHeight="62.0" prefWidth="616.0">
+                     <children>
+                        <Label layoutX="463.0" layoutY="4.0" text="Tiempo Restante:" textFill="#1d839d">
+                           <font>
+                              <Font name="Cambria Bold" size="15.0" />
+                           </font></Label>
+                        <TextFlow layoutX="120.0" layoutY="81.0" prefHeight="38.0" prefWidth="377.0" />
+                        <Label fx:id="nivelLabel" layoutX="262.0" layoutY="9.0" text="Nivel :  1" textFill="#1d839d">
+                           <font>
+                              <Font name="Cambria Math" size="29.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="timeLabel" layoutX="479.0" layoutY="16.0" prefHeight="38.0" prefWidth="105.0" text="00:00:00">
+                           <font>
+                              <Font size="27.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </Pane>
+                  <Pane prefHeight="231.0" prefWidth="616.0">
+                     <children>
+                        <TextFlow fx:id="showTextflow" layoutX="103.0" layoutY="65.0" opacity="0.44" prefHeight="38.0" prefWidth="436.0" style="-fx-background-color: #ADD8E6;" textAlignment="CENTER" />
+                        <Button fx:id="nextButton" layoutX="295.0" layoutY="192.0" mnemonicParsing="false" text="Siguiente " />
+                        <Label layoutX="99.0" layoutY="6.0" prefHeight="17.0" prefWidth="444.0" text="Copia el siguiente texto lo más rápido posible: " />
+                        <Label layoutX="103.0" layoutY="107.0" text="Aqui se muestra lo que vas escribiendo:" />
+                        <TextArea fx:id="inputTextArea" layoutX="101.0" layoutY="131.0" prefHeight="25.0" prefWidth="456.0" style="-fx-background-color: #ADD8E6;" />
+                        <Label layoutX="99.0" layoutY="24.0" prefHeight="17.0" prefWidth="444.0" text="Tener en cuenta: letras, espacios,mayúsculas y puntuación." />
+                        <Label layoutX="99.0" layoutY="41.0" prefHeight="17.0" prefWidth="444.0" text="Tecla Enter para avanzar o Botón Siguiente" />
+                     </children>
+                  </Pane>
+               </children>
+            </VBox>
+         </children></AnchorPane>
+  </items>
+</SplitPane>
