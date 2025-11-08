@@ -16,7 +16,7 @@ public class TimerLabel extends HBox {
 
     public TimerLabel(String title) {
         // Label  title
-        titleLabel = new Label(title + ": ");
+        titleLabel = new Label(title + " ");
         titleLabel.setFont(Font.font("Arial", 14));
         titleLabel.setStyle("-fx-text-fill: #2196F3; -fx-font-weight: bold;");
 

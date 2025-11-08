@@ -1,6 +1,7 @@
 package com.example.cincuentazo.controllers;
 
 import com.example.cincuentazo.models.Player;
+import com.example.cincuentazo.views.GameView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -32,14 +33,16 @@ public class WelcomeController extends Stage {
         Player player = new Player(nickname);
         player.setNickname(nickname);
         System.out.println(player.getNickName());
-        //GameView gameView = GameView.getInstance();
-        //gameView.getGameController().setPlayer(player);
-        //gameView.show();
-
         Integer numMaquinas = comboJugadores.getValue();
         if(numMaquinas==null){}else{
             System.out.println("Iniciando juego con " + numMaquinas + " jugadores CPU...");
         }
+
+        GameView gameView = GameView.getInstance();
+        gameView.getGameController().setPlayer(player);
+        gameView.show();
+
+
         Node sourceNode = (Node)event.getSource();
         Scene scene = sourceNode.getScene();
         Stage stage = (Stage)scene.getWindow();
