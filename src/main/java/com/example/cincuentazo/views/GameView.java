@@ -13,9 +13,9 @@ public class GameView extends Stage {
     private GameController gameController;
 
     public GameView() throws IOException {
-        this.setTitle("Craps Game");
+        this.setTitle("50zo Game");
         FXMLLoader fxmlLoader = new FXMLLoader(
-                getClass().getResource("/com/example/cincuentazo_poe/welcome-view.fxml")
+                getClass().getResource("/com/example/cincuentazo/game-view.fxml")
         );
         Parent root = fxmlLoader.load();
         gameController = fxmlLoader.getController();

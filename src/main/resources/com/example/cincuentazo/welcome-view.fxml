@@ -57,7 +57,7 @@
                      </font>
                   </Label>
                   <ComboBox fx:id="comboJugadores" prefWidth="150.0" promptText="1" />
-                  <Button fx:id="startGameBtn" alignment="BOTTOM_CENTER" mnemonicParsing="false" onAction="#startGame" prefHeight="31.0" prefWidth="229.0" style="-fx-background-color: #ffdd47; -fx-background-radius: 30; -fx-border-color: -fx-background-radius:;" text="Iniciar Juego">
+                  <Button fx:id="startGameBtn" alignment="BOTTOM_CENTER" mnemonicParsing="false" onAction="#startGame" prefHeight="31.0" prefWidth="229.0" style="-fx-background-color: #ffdd47; -fx-background-radius: 30;" text="Iniciar Juego">
                      <VBox.margin>
                         <Insets top="20.0" />
                      </VBox.margin>
