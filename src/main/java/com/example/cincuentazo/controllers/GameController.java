@@ -2,9 +2,12 @@ package com.example.cincuentazo.controllers;
 
 import com.example.cincuentazo.models.Card;
 import com.example.cincuentazo.models.Deck;
+import com.example.cincuentazo.models.Game;
 import com.example.cincuentazo.models.Player;
 import com.example.cincuentazo.utils.TimerLabel;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -20,16 +23,16 @@ public class GameController {
     @FXML private VBox playerM2CardsBox;  // arriba
     @FXML private Group playerM3CardsBox;*/ // derecha
     @FXML
-    private HBox playerCardsBox;      // Jugador principal (abajo)
+    private HBox playerCardsBox;      // Main player
 
     @FXML
-    private VBox playerM1CardsBox;    // Jugador izquierda
+    private VBox playerM1CardsBox;    // left player <-
 
     @FXML
-    private HBox playerM2CardsBox;    // Jugador arriba
+    private HBox playerM2CardsBox;    // up player
 
     @FXML
-    private VBox playerM3CardsBox;    // Jugador derecha
+    private VBox playerM3CardsBox;    // right player ->
 
     @FXML
     private StackPane stackCardsBox;  // Mazo central
@@ -38,25 +41,42 @@ public class GameController {
     private Button btnAceptar;        // Botón debajo del jugador
 
     @FXML
+    private StackPane stackCardsLeftBox;  //Cards left box
+
+    @FXML
+    private Button btnHowToPlay;
+    @FXML
+    private Button btnNewGame;
+    @FXML
     private Pane paneLabelTimer;
-    private TimerLabel timerLabel;
-    private ImageView selectedCardView = null;
     @FXML
     private Label nickNameLabel;
+    @FXML
+    private Label nicknameBot1Label;
 
-    private Player player;
+    @FXML
+    private Label nicknameBot2Label;
+
+    @FXML
+    private Label nicknameBot3Label;
+    @FXML
+    private Label currentSumLabel;
+    private TimerLabel timerLabel;
+    private ImageView selectedCardView = null;
 
     private Deck deck;
     private List<Card> playerHand;
     private List<Card> m1Hand;
     private List<Card> m2Hand;
     private List<Card> m3Hand;
-
+    private Game game;
+    private int currentSum;
+    private Card selectedCard;
     @FXML
     public void initialize() {
 
-
-        deck = new Deck();
+        game = new Game();
+        deck= game.getDeck();
 
         // Repartir 4 cartas a cada jugador
         playerHand = deck.dealCards(4);
@@ -75,7 +95,10 @@ public class GameController {
         // Mostrar una carta inicial en la mesa
         Card tableCard = deck.drawCard();
         showTableCard(tableCard);
+        btnAceptar.setCursor(Cursor.HAND);
 
+        currentSum = 0;
+        selectedCard=null;
         timerLabel= new TimerLabel("");
         paneLabelTimer.getChildren().add( timerLabel);
         timerLabel.start();
@@ -135,7 +158,13 @@ public class GameController {
         cardView.setFitHeight(130);
         cardView.setPreserveRatio(true);
         stackCardsBox.getChildren().add(cardView);
+        ImageView cardViewTable = new ImageView(new Image(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png")));
+        cardViewTable.setFitWidth(90);
+        cardViewTable.setFitHeight(130);
+        cardViewTable.setPreserveRatio(true);
+        stackCardsLeftBox.getChildren().add(cardViewTable);
     }
+
 
     private void onCardClicked(Card selectedCard, ImageView cardView) {
         System.out.println("You clicked: " + selectedCard.getName() +
@@ -143,32 +172,63 @@ public class GameController {
 
         // Si había una carta seleccionada antes, le quitamos el borde
         if (selectedCardView != null) {
+            selectedCardView.setScaleX(1.0);
+            selectedCardView.setScaleY(1.0);
             selectedCardView.setStyle(""); // limpia el estilo anterior
         }
 
         // Si el usuario vuelve a hacer clic en la misma carta, la deselecciona
         if (selectedCardView == cardView) {
+            selectedCardView.setScaleX(1.0);
+            selectedCardView.setScaleY(1.0);
             selectedCardView = null;
             return;
         }
 
-        // Aplicar borde amarillo brillante a la carta seleccionada
-        cardView.setStyle("-fx-effect: dropshadow(gaussian, yellow, 25, 0.5, 0, 0);"
-                + "-fx-border-color: yellow;"
-                + "-fx-border-width: 3;"
-                + "-fx-border-radius: 5;");
-
+        cardView.setScaleX(1.1);
+        cardView.setScaleY(1.1);
+        cardView.setStyle(
+                "-fx-effect: dropshadow(gaussian, yellow, 25, 0.5, 0, 0);" +
+                        "-fx-border-color: yellow;" +
+                        "-fx-border-width: 3;" +
+                        "-fx-border-radius: 5;"
+        );
         // Guardar esta carta como la actualmente seleccionada
         selectedCardView = cardView;
+        this.selectedCard = selectedCard;
+
     }
 
-    public void setPlayer(Player player) {
-        this.player=player;
+    public void setStartGame(Player player, int numMachinePlayer) {
+        this.game.setPlayer(player);
+        this.game.setNumMachinePlayer(numMachinePlayer);
         if (nickNameLabel != null) {
-            nickNameLabel.setText("Jugador: "+player.getNickName());
+            if(nickNameLabel.getText().equals("")){
+                nickNameLabel.setText("Player");
+            }else{
+            nickNameLabel.setText(game.getPlayer().getNickName());}
         }
+        System.out.println("Jugador: "+game.getPlayer().getNickName()+ " num: " +numMachinePlayer);
+    }
+
+
+
+    @FXML
+    void playCardAction(ActionEvent event) {
+        //Modificar este metodo para que muestre el valor de la suma actual en el label
+        if(selectedCard!=null){
+        currentSum+= selectedCard.getValueNumeric();
+        currentSumLabel.setText("Suma : "+String.valueOf(currentSum));  }
+    }
+    @FXML
+    void howToPlayAction(ActionEvent event) {
+
     }
 
     @FXML
-     void onPlayCardClicked(){ }
+    void newGameAction(ActionEvent event) {
+
+    }
+
+
 }

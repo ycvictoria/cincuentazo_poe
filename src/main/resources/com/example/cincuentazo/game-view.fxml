@@ -11,9 +11,9 @@
 <?import javafx.scene.paint.Stop?>
 <?import javafx.scene.text.Font?>
 
-<Pane prefHeight="594.0" prefWidth="622.0" style="-fx-background-color: #2E8B57;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cincuentazo.controllers.GameController">
+<Pane prefHeight="608.0" prefWidth="645.0" style="-fx-background-color: #2E8B57;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cincuentazo.controllers.GameController">
    <children>
-      <Pane layoutX="-6.0" layoutY="99.0" prefHeight="594.0" prefWidth="635.0" style="-fx-background-color: #2E8B57;">
+      <Pane layoutX="14.0" layoutY="97.0" prefHeight="513.0" prefWidth="630.0" style="-fx-background-color: #2E8B57;">
          <children>
                 <!-- Arriba -->
                 <HBox fx:id="playerM2CardsBox" alignment="CENTER" layoutX="391.0" layoutY="58.0" style="-fx-background-color: black;" />
@@ -22,21 +22,42 @@
                 <VBox fx:id="playerM3CardsBox" alignment="CENTER" layoutX="72.0" layoutY="339.0" prefHeight="0.0" prefWidth="0.0" style="-fx-background-color: yellow;" />
 
                       <!-- Centro -->
-                <StackPane fx:id="stackCardsBox" alignment="CENTER" layoutX="227.0" layoutY="132.0" prefHeight="160" prefWidth="120" style="-fx-border-color: white; -fx-border-width: 2;" />
+                <StackPane fx:id="stackCardsBox" alignment="CENTER" layoutX="301.0" layoutY="134.0" prefHeight="152.0" prefWidth="109.0" style="-fx-border-color: white; -fx-border-width: 2;" />
 
                       <!-- Derecha -->
-                <VBox fx:id="playerM1CardsBox" alignment="CENTER" layoutX="511.0" layoutY="338.0" style="-fx-background-color: yellow;" />
+                <VBox fx:id="playerM1CardsBox" alignment="CENTER" layoutX="505.0" layoutY="329.0" style="-fx-background-color: yellow;" />
             <Pane layoutX="14.0" layoutY="376.0" prefHeight="132.0" prefWidth="593.0">
                <children>
-                        <HBox fx:id="playerCardsBox" alignment="CENTER" layoutX="376.0" layoutY="10.0" prefHeight="8.0" prefWidth="231.0" spacing="10" />
-                  <Label fx:id="nickNameLabel" layoutX="32.0" layoutY="78.0" text="Nickname" textFill="#e4d615">
+                        <HBox fx:id="playerCardsBox" alignment="CENTER" layoutX="377.0" layoutY="14.0" prefHeight="8.0" prefWidth="231.0" spacing="10" />
+                  <Label fx:id="nickNameLabel" layoutX="120.0" layoutY="90.0" text="Nickname" textFill="#e4d615">
                      <font>
                         <Font name="System Bold" size="17.0" />
                      </font>
                   </Label>
-                        <Button fx:id="btnAceptar" alignment="CENTER" contentDisplay="CENTER" layoutX="221.0" layoutY="78.0" prefHeight="25.0" prefWidth="120.0" style="-fx-background-color: #ffdd47; -fx-text-fill: #2E8B57; -fx-font-weight: bold;" text="Seleccionar Carta" />
+                        <Button fx:id="btnAceptar" alignment="CENTER" contentDisplay="CENTER" layoutX="224.0" layoutY="90.0" onAction="#playCardAction" prefHeight="25.0" prefWidth="120.0" style="-fx-background-color: #ffdd47; -fx-text-fill: #2E8B57; -fx-font-weight: bold;" text="Seleccionar Carta" />
+                  <Label fx:id="nicknameBot3Label" layoutX="28.0" layoutY="14.0" text="Bot 3" textFill="#e4d615">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="nicknameBot1Label" layoutX="471.0" layoutY="9.0" text="Bot 1" textFill="#e4d615">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font>
+                  </Label>
                </children>
             </Pane>
+            <StackPane fx:id="stackCardsLeftBox" alignment="CENTER" layoutX="178.0" layoutY="134.0" prefHeight="152.0" prefWidth="109.0" style="-fx-border-color: white; -fx-border-width: 2;" />
+            <Label fx:id="currentSumLabel" layoutX="310.0" layoutY="297.0" text="Suma: " textFill="#e4d615">
+               <font>
+                  <Font name="System Bold" size="17.0" />
+               </font>
+            </Label>
+            <Label fx:id="nicknameBot2Label" layoutX="471.0" layoutY="23.0" text="Bot 2" textFill="#e4d615">
+               <font>
+                  <Font name="System Bold" size="17.0" />
+               </font>
+            </Label>
          </children>
       </Pane>
 
@@ -66,9 +87,9 @@
             </Label>
                 <Pane prefHeight="91.0" prefWidth="247.0" HBox.hgrow="ALWAYS">
                <children>
-                      <Button fx:id="btnHowToPlay" layoutX="134.0" layoutY="19.0" style="-fx-background-color: #ffdd47; -fx-text-fill: #2E8B57; -fx-font-weight: bold;" text="¿Cómo jugar?" />
+                      <Button fx:id="btnHowToPlay" layoutX="134.0" layoutY="19.0" onAction="#howToPlayAction" style="-fx-background-color: #ffdd47; -fx-text-fill: #2E8B57; -fx-font-weight: bold;" text="¿Cómo jugar?" />
                   <Pane fx:id="paneLabelTimer" layoutX="14.0" layoutY="29.0" prefHeight="40.0" prefWidth="70.0" />
-                  <Button fx:id="btnHowToPlay1" layoutX="135.0" layoutY="59.0" style="-fx-background-color: #ffdd47; -fx-text-fill: #2E8B57; -fx-font-weight: bold;" text="Nuevo Juego" />
+                  <Button fx:id="btnNewGame" layoutX="135.0" layoutY="59.0" onAction="#newGameAction" style="-fx-background-color: #ffdd47; -fx-text-fill: #2E8B57; -fx-font-weight: bold;" text="Nuevo Juego" />
                </children>
             </Pane>
             </children>
