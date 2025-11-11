@@ -62,4 +62,58 @@ public class Game {
     public void setActualSum(int actualSum) {this.actualSum=actualSum;}
     public int getActualSum() {return actualSum;}
 
+
+    /**
+     * Calcula el efecto real de una carta sobre la suma de la mesa,
+     * aplicando las reglas del juego Cincuentazo.
+     *
+     * Reglas:
+     * - 2–8 y 10 suman su número.
+     * - 9 no suma ni resta.
+     * - J, Q, K restan 10.
+     * - A suma 1 o 10 según convenga (sin pasar de 50).
+     *
+     * @param card        carta a evaluar.
+     * @param currentSum  suma actual en la mesa.
+     * @return valor que se debe sumar (puede ser negativo o cero).
+     */
+    public int evaluateCardEffect(Card card, int currentSum) {
+        String name = card.getName();
+        int gameValue = 0;
+
+        switch (name) {
+            case "J", "Q", "K":
+                gameValue = -10;
+                break;
+
+            case "9":
+                gameValue = 0;
+                break;
+
+            case "A":
+                if (currentSum + 10 <= 50) {
+                    gameValue = 10;
+                } else {
+                    gameValue = 1;
+                }
+                break;
+
+            case "0":
+                gameValue = 10;
+                break;
+
+            default:
+                try {
+                    gameValue = Integer.parseInt(name);
+                } catch (NumberFormatException e) {
+                    gameValue = 0;
+                }
+                break;
+        }
+
+        return gameValue;
+    }
+
+
+
 }
