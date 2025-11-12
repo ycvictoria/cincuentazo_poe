@@ -13,60 +13,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
-<<<<<<< HEAD
-=======
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 
->>>>>>> jdsn
 import java.util.List;
 
 public class GameController {
 
-<<<<<<< HEAD
-    /*@FXML private HBox playerCardsBox;    // abajo (jugador humano)
-    @FXML private VBox playerM1CardsBox; // izquierda
-    @FXML private VBox playerM2CardsBox;  // arriba
-    @FXML private Group playerM3CardsBox;*/ // derecha
-    @FXML
-    private HBox playerCardsBox;      // Main player
-
-    @FXML
-    private VBox playerM1CardsBox;    // left player <-
-
-    @FXML
-    private HBox playerM2CardsBox;    // up player
-
-    @FXML
-    private VBox playerM3CardsBox;    // right player ->
-
-    @FXML
-    private StackPane stackCardsBox;  // Mazo central
-
-    @FXML
-    private Button btnAceptar;        // Botón debajo del jugador
-
-    @FXML
-    private StackPane stackCardsLeftBox;  //Cards left box
-
-    @FXML
-    private Button btnHowToPlay;
-    @FXML
-    private Button btnNewGame;
-    @FXML
-    private Pane paneLabelTimer;
-    @FXML
-    private Label nickNameLabel;
-    @FXML
-    private Label nicknameBot1Label;
-
-    @FXML
-    private Label nicknameBot2Label;
-
-    @FXML
-    private Label nicknameBot3Label;
-    @FXML
-    private Label currentSumLabel;
-=======
     @FXML private HBox playerCardsBox;      // Main player (abajo)
     @FXML private VBox playerM1CardsBox;    // izquierda
     @FXML private HBox playerM2CardsBox;    // arriba
@@ -86,7 +41,6 @@ public class GameController {
     @FXML private Label nicknameBot3Label;
     @FXML private Label currentSumLabel;
 
->>>>>>> jdsn
     private TimerLabel timerLabel;
     private ImageView selectedCardView = null;
 
@@ -95,16 +49,6 @@ public class GameController {
     private List<Card> m1Hand;
     private List<Card> m2Hand;
     private List<Card> m3Hand;
-<<<<<<< HEAD
-    private Game game;
-    private int currentSum;
-    private Card selectedCard;
-    @FXML
-    public void initialize() {
-
-        game = new Game();
-        deck= game.getDeck();
-=======
 
     private Game game;
     private int currentSum;
@@ -114,7 +58,6 @@ public class GameController {
     public void initialize() {
         game = new Game();
         deck = game.getDeck();
->>>>>>> jdsn
 
         // Repartir 4 cartas a cada jugador
         playerHand = deck.dealCards(4);
@@ -122,29 +65,12 @@ public class GameController {
         m2Hand = deck.dealCards(4);
         m3Hand = deck.dealCards(4);
 
-<<<<<<< HEAD
-
-        // Mostrar cartas
-=======
         // Mostrar manos
->>>>>>> jdsn
         showCards(playerCardsBox, playerHand, true);
         showCards(playerM1CardsBox, m1Hand, false);
         showCards(playerM2CardsBox, m2Hand, false);
         showCards(playerM3CardsBox, m3Hand, false);
 
-<<<<<<< HEAD
-
-        // Mostrar una carta inicial en la mesa
-        Card tableCard = deck.drawCard();
-        showTableCard(tableCard);
-        btnAceptar.setCursor(Cursor.HAND);
-
-        currentSum = 0;
-        selectedCard=null;
-        timerLabel= new TimerLabel("");
-        paneLabelTimer.getChildren().add( timerLabel);
-=======
         // Carta inicial en mesa + suma inicial correcta
         Card tableCard = deck.drawCard();
         showTableCard(tableCard);
@@ -152,16 +78,18 @@ public class GameController {
         int initialValue = game.evaluateCardEffect(tableCard, 0);
         currentSum = initialValue;
         game.setActualSum(initialValue);
-        currentSumLabel.setText("Suma : " + currentSum);
+        if (currentSumLabel != null) {
+            currentSumLabel.setText("Suma : " + currentSum);
+        }
 
         btnAceptar.setCursor(Cursor.HAND);
-
         selectedCard = null;
 
         // Timer
         timerLabel = new TimerLabel("");
-        paneLabelTimer.getChildren().add(timerLabel);
->>>>>>> jdsn
+        if (paneLabelTimer != null) {
+            paneLabelTimer.getChildren().add(timerLabel);
+        }
         timerLabel.start();
     }
 
@@ -171,10 +99,6 @@ public class GameController {
 
         double overlap = -70;
         int index = 0;
-<<<<<<< HEAD
-        int total = cards.size();
-=======
->>>>>>> jdsn
 
         for (Card c : cards) {
             Image image = faceUp
@@ -200,16 +124,8 @@ public class GameController {
             cardPane.setRotate(baseRotation);
             cardPane.setManaged(false);
 
-<<<<<<< HEAD
-            if (container instanceof HBox) {
-                cardPane.setTranslateX(index * overlap);
-            } else {
-                cardPane.setTranslateY(index * overlap);
-            }
-=======
             if (container instanceof HBox) cardPane.setTranslateX(index * overlap);
             else cardPane.setTranslateY(index * overlap);
->>>>>>> jdsn
 
             if (container instanceof Pane pane) pane.getChildren().add(cardPane);
             else if (container instanceof Group group) group.getChildren().add(cardPane);
@@ -218,13 +134,8 @@ public class GameController {
         }
     }
 
-<<<<<<< HEAD
-
-    private void showTableCard(Card card) {
-=======
     private void showTableCard(Card card) {
         // Actualiza carta visible en mesa
->>>>>>> jdsn
         stackCardsBox.getChildren().clear();
         Image image = new Image(getClass().getResourceAsStream(card.getImagePath()));
         ImageView cardView = new ImageView(image);
@@ -232,37 +143,18 @@ public class GameController {
         cardView.setFitHeight(130);
         cardView.setPreserveRatio(true);
         stackCardsBox.getChildren().add(cardView);
-<<<<<<< HEAD
-        ImageView cardViewTable = new ImageView(new Image(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png")));
-=======
 
         // Evita acumular backs del mazo a la izquierda
         stackCardsLeftBox.getChildren().clear();
         ImageView cardViewTable = new ImageView(
                 new Image(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png"))
         );
->>>>>>> jdsn
         cardViewTable.setFitWidth(90);
         cardViewTable.setFitHeight(130);
         cardViewTable.setPreserveRatio(true);
         stackCardsLeftBox.getChildren().add(cardViewTable);
     }
 
-<<<<<<< HEAD
-
-    private void onCardClicked(Card selectedCard, ImageView cardView) {
-        System.out.println("You clicked: " + selectedCard.getName() +
-                " (value " + selectedCard.getValueNumeric() + ")");
-
-        // Si había una carta seleccionada antes, le quitamos el borde
-        if (selectedCardView != null) {
-            selectedCardView.setScaleX(1.0);
-            selectedCardView.setScaleY(1.0);
-            selectedCardView.setStyle(""); // limpia el estilo anterior
-        }
-
-        // Si el usuario vuelve a hacer clic en la misma carta, la deselecciona
-=======
     private void onCardClicked(Card selectedCard, ImageView cardView) {
         // Quitar estilo de selección previo
         if (selectedCardView != null) {
@@ -272,22 +164,15 @@ public class GameController {
         }
 
         // Si clican la misma, deseleccionar
->>>>>>> jdsn
         if (selectedCardView == cardView) {
             selectedCardView.setScaleX(1.0);
             selectedCardView.setScaleY(1.0);
             selectedCardView = null;
-<<<<<<< HEAD
-            return;
-        }
-
-=======
             this.selectedCard = null;
             return;
         }
 
         // Nuevo estilo de selección
->>>>>>> jdsn
         cardView.setScaleX(1.1);
         cardView.setScaleY(1.1);
         cardView.setStyle(
@@ -296,44 +181,15 @@ public class GameController {
                         "-fx-border-width: 3;" +
                         "-fx-border-radius: 5;"
         );
-<<<<<<< HEAD
-        // Guardar esta carta como la actualmente seleccionada
-        selectedCardView = cardView;
-        this.selectedCard = selectedCard;
-
-=======
 
         selectedCardView = cardView;
         this.selectedCard = selectedCard;
->>>>>>> jdsn
     }
 
     public void setStartGame(Player player, int numMachinePlayer) {
         this.game.setPlayer(player);
         this.game.setNumMachinePlayer(numMachinePlayer);
         if (nickNameLabel != null) {
-<<<<<<< HEAD
-            if(nickNameLabel.getText().equals("")){
-                nickNameLabel.setText("Player");
-            }else{
-            nickNameLabel.setText(game.getPlayer().getNickName());}
-        }
-        System.out.println("Jugador: "+game.getPlayer().getNickName()+ " num: " +numMachinePlayer);
-    }
-
-
-
-    @FXML
-    void playCardAction(ActionEvent event) {
-        //Modificar este metodo para que muestre el valor de la suma actual en el label
-        if(selectedCard!=null){
-        currentSum+= selectedCard.getValueNumeric();
-        currentSumLabel.setText("Suma : "+String.valueOf(currentSum));  }
-    }
-    @FXML
-    void howToPlayAction(ActionEvent event) {
-
-=======
             if (nickNameLabel.getText().equals("")) {
                 nickNameLabel.setText("Player");
             } else {
@@ -350,8 +206,6 @@ public class GameController {
 
         int gameValue = game.evaluateCardEffect(selectedCard, currentSum);
         if (currentSum + gameValue > 50) {
-            // Jugada inválida: simplemente no la permitimos (versión mínima)
-            // (más adelante podemos mostrar alerta con Alerts50Game)
             System.out.println("Jugada inválida: excede 50.");
             return;
         }
@@ -359,7 +213,9 @@ public class GameController {
         // Actualizar suma y mesa
         currentSum += gameValue;
         game.setActualSum(currentSum);
-        currentSumLabel.setText("Suma : " + currentSum);
+        if (currentSumLabel != null) {
+            currentSumLabel.setText("Suma : " + currentSum);
+        }
 
         // Mover la carta seleccionada a la mesa (visual)
         showTableCard(selectedCard);
@@ -384,25 +240,15 @@ public class GameController {
             selectedCardView = null;
         }
         selectedCard = null;
-
-        // (Próximas fases: pasar turno a bots, verificar eliminación, etc.)
     }
 
     @FXML
     void howToPlayAction(ActionEvent event) {
-        // TODO: Mostrar reglas/jugador (en otra fase)
->>>>>>> jdsn
+        // TODO: Mostrar reglas (siguiente fase)
     }
 
     @FXML
     void newGameAction(ActionEvent event) {
-<<<<<<< HEAD
-
+        // TODO: Reiniciar partida (siguiente fase)
     }
-
-
-=======
-        // TODO: Reiniciar partida (en otra fase)
-    }
->>>>>>> jdsn
 }

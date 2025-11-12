@@ -10,26 +10,23 @@ public class Game {
     private int numMachinePlayer;
 
     private int actualSum;
-    private List<Player> machinePlayers = new ArrayList<>();
-    private List<Player> players;
+    private final List<Player> machinePlayers = new ArrayList<>();
     private int currentTurnIndex = 0;
     private Card lastPlayedCard;
 
-    public  Game(){
-
-        deck= new Deck();
+    public Game() {
+        deck = new Deck();
     }
-    public Player getPlayer() {return player;}
 
-    public Deck getDeck() {return deck;}
+    public Player getPlayer() { return player; }
+    public Deck getDeck() { return deck; }
+    public int getNumMachinePlayer() { return numMachinePlayer; }
 
-    public int getNumMachinePlayer() {return numMachinePlayer;}
-
-    public void setPlayer(Player player) {this.player=player;}
-    public void setDeck(Deck deck) {this.deck=deck;}
+    public void setPlayer(Player player) { this.player = player; }
+    public void setDeck(Deck deck) { this.deck = deck; }
 
     public void setNumMachinePlayer(int numMachinePlayer) {
-        this.numMachinePlayer=numMachinePlayer;
+        this.numMachinePlayer = numMachinePlayer;
         createMachinePlayers();
     }
 
@@ -39,52 +36,53 @@ public class Game {
             machinePlayers.add(new Player("Bot " + i, false));
         }
     }
+
+    /** Humano + bots (si el humano es null, solo bots) */
     public List<Player> getAllPlayers() {
         List<Player> all = new ArrayList<>();
-        all.add(player);
+        if (player != null) all.add(player);
         all.addAll(machinePlayers);
         return all;
     }
+
     public List<Player> getMachinePlayers() {
         return machinePlayers;
     }
+
+    /** Reparte cartas a todos los jugadores actuales (humano + bots). */
     public void dealCards(int cardsPerPlayer) {
+        List<Player> all = getAllPlayers();
         for (int i = 0; i < cardsPerPlayer; i++) {
-            for (Player player : players) {
+            for (Player p : all) {
                 Card card = deck.drawCard();
                 if (card != null) {
-                    player.addCard(card);
+                    p.addCard(card);
                 }
             }
         }
     }
-    public void setNumCardPlayer(int numCardPlayer) {}
-    public void setActualSum(int actualSum) {this.actualSum=actualSum;}
-    public int getActualSum() {return actualSum;}
 
-<<<<<<< HEAD
-=======
+    public void setNumCardPlayer(int numCardPlayer) { /* pendiente según reglas */ }
+    public void setActualSum(int actualSum) { this.actualSum = actualSum; }
+    public int getActualSum() { return actualSum; }
 
     /**
-     * Calcula el efecto real de una carta sobre la suma de la mesa,
-     * aplicando las reglas del juego Cincuentazo.
-     *
+     * Calcula el efecto real de una carta sobre la suma de la mesa (Cincuentazo).
      * Reglas:
      * - 2–8 y 10 suman su número.
      * - 9 no suma ni resta.
      * - J, Q, K restan 10.
      * - A suma 1 o 10 según convenga (sin pasar de 50).
-     *
-     * @param card        carta a evaluar.
-     * @param currentSum  suma actual en la mesa.
-     * @return valor que se debe sumar (puede ser negativo o cero).
+     * - "0" representa el 10 en los nombres de archivo/cartas.
      */
     public int evaluateCardEffect(Card card, int currentSum) {
         String name = card.getName();
-        int gameValue = 0;
+        int gameValue;
 
         switch (name) {
-            case "J", "Q", "K":
+            case "J":
+            case "Q":
+            case "K":
                 gameValue = -10;
                 break;
 
@@ -93,14 +91,10 @@ public class Game {
                 break;
 
             case "A":
-                if (currentSum + 10 <= 50) {
-                    gameValue = 10;
-                } else {
-                    gameValue = 1;
-                }
+                gameValue = (currentSum + 10 <= 50) ? 10 : 1;
                 break;
 
-            case "0":
+            case "0": // 10
                 gameValue = 10;
                 break;
 
@@ -115,8 +109,4 @@ public class Game {
 
         return gameValue;
     }
-
-
-
->>>>>>> jdsn
 }
