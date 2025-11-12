@@ -53,6 +53,10 @@ public class Deck {
                 int value;
                 switch (rank) {
                     case "A" -> value = 1;
+<<<<<<< HEAD
+=======
+                    case "0" -> value = 10;
+>>>>>>> jdsn
                     case "J" -> value = 11;
                     case "Q" -> value = 12;
                     case "K" -> value = 13;
