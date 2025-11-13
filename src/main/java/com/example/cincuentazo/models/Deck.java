@@ -56,4 +56,8 @@ public class Deck {
     public int remainingCards() {
         return cards.size() - currentIndex;
     }
+
+    public List<Card> getCards() {
+        return cards;
+    }
 }

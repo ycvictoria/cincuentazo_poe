@@ -11,7 +11,7 @@
 <?import javafx.scene.paint.Stop?>
 <?import javafx.scene.text.Font?>
 
-<Pane prefHeight="608.0" prefWidth="645.0" style="-fx-background-color: #2E8B57;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cincuentazo.controllers.GameController">
+<Pane prefHeight="608.0" prefWidth="645.0" style="-fx-background-color: #2E8B57;" xmlns="http://javafx.com/javafx/17.0.14" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cincuentazo.controllers.GameController">
    <children>
       <Pane layoutX="14.0" layoutY="97.0" prefHeight="513.0" prefWidth="630.0" style="-fx-background-color: #2E8B57;">
          <children>
