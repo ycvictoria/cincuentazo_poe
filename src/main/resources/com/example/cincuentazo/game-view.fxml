@@ -11,6 +11,7 @@
 <?import javafx.scene.paint.Stop?>
 <?import javafx.scene.text.Font?>
 
+
 <Pane prefHeight="608.0" prefWidth="645.0" style="-fx-background-color: #2E8B57;" xmlns="http://javafx.com/javafx/17.0.14" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cincuentazo.controllers.GameController">
    <children>
       <Pane layoutX="14.0" layoutY="97.0" prefHeight="513.0" prefWidth="630.0" style="-fx-background-color: #2E8B57;">
@@ -18,13 +19,13 @@
                 <!-- Arriba -->
                 <HBox fx:id="playerM2CardsBox" alignment="CENTER" layoutX="391.0" layoutY="58.0" style="-fx-background-color: black;" />
 
-                      <!-- Izquierda -->
+                            <!-- Izquierda -->
                 <VBox fx:id="playerM3CardsBox" alignment="CENTER" layoutX="72.0" layoutY="339.0" prefHeight="0.0" prefWidth="0.0" style="-fx-background-color: yellow;" />
 
-                      <!-- Centro -->
+                            <!-- Centro -->
                 <StackPane fx:id="stackCardsBox" alignment="CENTER" layoutX="301.0" layoutY="134.0" prefHeight="152.0" prefWidth="109.0" style="-fx-border-color: white; -fx-border-width: 2;" />
 
-                      <!-- Derecha -->
+                            <!-- Derecha -->
                 <VBox fx:id="playerM1CardsBox" alignment="CENTER" layoutX="505.0" layoutY="329.0" style="-fx-background-color: yellow;" />
             <Pane layoutX="14.0" layoutY="376.0" prefHeight="132.0" prefWidth="593.0">
                <children>
@@ -61,7 +62,7 @@
          </children>
       </Pane>
 
-              <!-- Encabezado -->
+                    <!-- Encabezado -->
         <HBox alignment="CENTER_LEFT" prefHeight="97.0" prefWidth="600" style="-fx-background-color: #2E8B57;">
             <children>
             <Label prefHeight="58.0" prefWidth="431.0" style="-fx-background-color: #2E8B57;" text=" CINCUENTAZO">

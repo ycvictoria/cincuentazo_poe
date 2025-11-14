@@ -47,7 +47,7 @@ public class WelcomeController extends Stage {
         Node sourceNode = (Node)event.getSource();
         Scene scene = sourceNode.getScene();
         Stage stage = (Stage)scene.getWindow();
-        //stage.close();
+        stage.close();
     }
 
     @FXML
@@ -60,7 +60,7 @@ public class WelcomeController extends Stage {
         }));
 
         comboJugadores.getItems().addAll(1, 2, 3);
-        comboJugadores.setPromptText("N° jugadores CPU");
+        //comboJugadores.setPromptText("N° jugadores CPU");
         startGameBtn.setCursor(Cursor.HAND);
 
     }
