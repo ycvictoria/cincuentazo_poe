@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,6 +16,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,6 +96,9 @@ public class GameController {
             paneLabelTimer.getChildren().add(timerLabel);
         }
         timerLabel.start();
+
+        // Desactivar el botón de reinicio al principio
+        btnNewGame.setDisable(true);
     }
 
     private void showCards(Object container, List<Card> cards, boolean faceUp) {
@@ -275,12 +280,53 @@ public class GameController {
 
     @FXML
     void howToPlayAction(ActionEvent event) {
-        // TODO: Mostrar reglas (siguiente fase)
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Instrucciones del Cincuentazo (50zo)");
+        alert.setHeaderText("Regla Principal: No exceder la Suma de 50.");
+
+        String content =
+                "1. OBJETIVO: Ser el último jugador en pie.\n\n" +
+                        "2. INICIO:\n" +
+                        "   - Todos los jugadores reciben 4 cartas. El juego inicia con una carta en la mesa.\n\n" +
+                        "3. VALORES DE CARTAS:\n" +
+                        "   - 2 a 8, 10: Suman su valor numérico.\n" +
+                        "   - 9: Ni suma ni resta (Valor 0).\n" +
+                        "   - J, Q, K: Restan 10.\n" +
+                        "   - A (As): Suman 1 o 10 (según convenga para no exceder 50).\n\n" +
+                        "4. TURNO:\n" +
+                        "   - Juega una carta sin exceder la suma de 50.\n" +
+                        "   - Roba una carta del mazo para mantener 4 en mano.\n\n" +
+                        "5. ELIMINACIÓN:\n" +
+                        "   - Un jugador es ELIMINADO si al inicio de su turno no tiene jugadas válidas (todas sus cartas exceden 50).\n" +
+                        "   - Las cartas eliminadas vuelven al mazo.";
+
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     @FXML
     void newGameAction(ActionEvent event) {
-        // TODO: Reiniciar partida (siguiente fase)
+        // 1. Detener el Cronómetro
+        if (timerLabel != null) {
+            timerLabel.stop();
+        }
+
+        // 2. Cerrar la ventana de juego actual
+        Node sourceNode = (Node)event.getSource();
+        Stage currentStage = (Stage)sourceNode.getScene().getWindow();
+        currentStage.close();
+
+        try {
+            // 3. Abrir la WelcomeView para un nuevo juego
+            // Asumiendo que tu clase WelcomeView maneja la carga del FXML de bienvenida
+            com.example.cincuentazo.views.WelcomeView welcomeView =
+                    new com.example.cincuentazo.views.WelcomeView();
+            welcomeView.show();
+
+        } catch (Exception e) {
+            // Manejar cualquier error al intentar abrir la nueva vista
+            e.printStackTrace();
+        }
     }
 
     private void startNextTurn() {
@@ -492,6 +538,9 @@ public class GameController {
         nickNameLabel.setText("ELIMINADO");
         enableHumanControls(false); // Deshabilitar botones
 
+        // Habilitar el botón de Nuevo Juego
+        btnNewGame.setDisable(false);
+
         // 3. Verificar fin del juego
         if (game.getAllPlayers().size() <= 1) {
             // Lógica de (Fin del juego)
@@ -521,6 +570,10 @@ public class GameController {
     }
 
     private void showGameEndAlert(String winner) {
+        if (timerLabel != null) {
+            timerLabel.stop();
+        }
+
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("¡Fin del Juego!");
         timerLabel.stop(); // Detener el temporizador al final
@@ -534,5 +587,8 @@ public class GameController {
         }
 
         alert.showAndWait();
+
+        // Habilitar el botón después de que el juego termine
+        btnNewGame.setDisable(false);
     }
 }
