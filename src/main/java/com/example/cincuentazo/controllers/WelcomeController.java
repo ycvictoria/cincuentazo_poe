@@ -21,11 +21,11 @@ public class WelcomeController extends Stage {
 
     @FXML
     private Button startGameBtn;
-    public WelcomeController()  throws IOException {
 
-    }
     @FXML
     private ComboBox<Integer> comboJugadores;
+
+    public WelcomeController() {}
 
     @FXML
     void startGame(ActionEvent event) throws IOException{
@@ -60,8 +60,9 @@ public class WelcomeController extends Stage {
         }));
 
         comboJugadores.getItems().addAll(1, 2, 3);
-        //comboJugadores.setPromptText("N° jugadores CPU");
+        comboJugadores.setPromptText("N° jugadores CPU");
         startGameBtn.setCursor(Cursor.HAND);
+        startGameBtn.setDefaultButton(true);
 
     }
 }

@@ -62,30 +62,12 @@ public class GameController {
         game = new Game();
         deck = game.getDeck();
 
-        /*
-        // Repartir 4 cartas a cada jugador
-        playerHand = deck.dealCards(4);
-        m1Hand = deck.dealCards(4);
-        m2Hand = deck.dealCards(4);
-        m3Hand = deck.dealCards(4);
 
-        // Mostrar manos
-        showCards(playerCardsBox, playerHand, true);
-        showCards(playerM1CardsBox, m1Hand, false);
-        showCards(playerM2CardsBox, m2Hand, false);
-        showCards(playerM3CardsBox, m3Hand, false);
-        */
 
         // Carta inicial en mesa + suma inicial correcta
-        Card tableCard = deck.drawCard();
-        showTableCard(tableCard);
+        currentSum = 0;
+        if (currentSumLabel != null) currentSumLabel.setText("Suma : 0");
 
-        int initialValue = game.evaluateCardEffect(tableCard, 0);
-        currentSum = initialValue;
-        game.setActualSum(initialValue);
-        if (currentSumLabel != null) {
-            currentSumLabel.setText("Suma : " + currentSum);
-        }
 
         btnAceptar.setCursor(Cursor.HAND);
         selectedCard = null;
@@ -199,38 +181,51 @@ public class GameController {
         this.game.setNumMachinePlayer(numMachinePlayer);
 
         if (nickNameLabel != null) {
-            if (nickNameLabel.getText().equals("")) {
-                nickNameLabel.setText("Player");
-            } else {
-                nickNameLabel.setText(game.getPlayer().getNickName());
-            }
+            nickNameLabel.setText(
+                    (nickNameLabel.getText() == null || nickNameLabel.getText().isBlank())
+                            ? "Player"
+                            : game.getPlayer().getNickName()
+            );
         }
 
-        // AÑADIR NUEVA LÓGICA DE REPARTO Y VISTA
-        // 1. Repartir cartas a todos los jugadores creados (Humano + Máquinas)
+        // 1) Repartir a todos (humano + bots)
         game.dealCards(4);
 
-        // 2. Asignar las manos a las variables locales (solo para el humano)
-        //    Las manos de las máquinas ya están en game.getMachinePlayers()
+        // 2) Manos visibles
         playerHand = game.getPlayer().getHand();
-
-        // 3. Mostrar manos de todos los jugadores creados
         showCards(playerCardsBox, playerHand, true);
-
-        // Mostrar solo las máquinas que existen (numMachinePlayer)
         if (numMachinePlayer >= 1) {
             showCards(playerM1CardsBox, game.getMachinePlayers().get(0).getHand(), false);
+            if (nicknameBot1Label != null) nicknameBot1Label.setText("Bot 1");
+        } else {
+            if (playerM1CardsBox != null) playerM1CardsBox.setVisible(false);
         }
         if (numMachinePlayer >= 2) {
             showCards(playerM2CardsBox, game.getMachinePlayers().get(1).getHand(), false);
+            if (nicknameBot2Label != null) nicknameBot2Label.setText("Bot 2");
+        } else {
+            if (playerM2CardsBox != null) playerM2CardsBox.setVisible(false);
         }
         if (numMachinePlayer >= 3) {
             showCards(playerM3CardsBox, game.getMachinePlayers().get(2).getHand(), false);
+            if (nicknameBot3Label != null) nicknameBot3Label.setText("Bot 3");
+        } else {
+            if (playerM3CardsBox != null) playerM3CardsBox.setVisible(false);
         }
 
-        System.out.println("Jugador: " + game.getPlayer().getNickName() + " num: " + numMachinePlayer);
-        startNextTurn(); // 4. Iniciar el juego
+        // 3) Carta inicial en mesa (ahora sí, después de repartir)
+        Card tableCard = deck.drawCard();
+        showTableCard(tableCard);
+        int initialValue = game.evaluateCardEffect(tableCard, 0);
+        currentSum = initialValue;
+        game.setActualSum(initialValue);
+        if (currentSumLabel != null) currentSumLabel.setText("Suma : " + currentSum);
+
+        // 4) Garantizar que empiece el humano
+        currentTurnPlayerIndex = -1;
+        startNextTurn();
     }
+
 
     @FXML
     void playCardAction(ActionEvent event) {
@@ -576,7 +571,6 @@ public class GameController {
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("¡Fin del Juego!");
-        timerLabel.stop(); // Detener el temporizador al final
 
         if (winner.equals("NADIE")) {
             alert.setHeaderText("¡Juego Terminado!");
