@@ -13,7 +13,7 @@ public class GameView extends Stage {
     private GameController gameController;
 
     public GameView() throws IOException {
-        this.setTitle("50zo Game");
+        this.setTitle("Cincuentazo");
         FXMLLoader fxmlLoader = new FXMLLoader(
                 getClass().getResource("/com/example/cincuentazo/game-view.fxml")
         );

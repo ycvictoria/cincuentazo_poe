@@ -57,8 +57,9 @@ public class MachinePlayerThread extends Thread {
              });
 
             } catch (InterruptedException e) {
-            System.err.println("El hilo del jugador máquina " + machinePlayerId + " fue interrumpido.");
-                Thread.currentThread().interrupt();
+            System.err.println("El hilo del jugador máquina " + machinePlayerId + " fue interrumpido y detenido.");
+                //Thread.currentThread().interrupt();
+                return; // Detiene la ejecución del hilo.
             }
         }
 
@@ -68,7 +69,8 @@ public class MachinePlayerThread extends Thread {
      */
     private Card findBestMove(int currentSum, List<Card> hand) {
         Card bestCard = null;
-        int bestNewSum = -1;
+        // Esto garantiza que CUALQUIER suma válida (incluyendo -20) sea mayor que este valor inicial.
+        int bestNewSum = Integer.MIN_VALUE;
 
         for (Card card : hand) {
             // Usa la lógica de evaluación del juego

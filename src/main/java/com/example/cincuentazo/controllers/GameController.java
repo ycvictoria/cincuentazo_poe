@@ -17,9 +17,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GameController {
 
@@ -54,15 +54,15 @@ public class GameController {
     private Game game;
     private int currentSum;
     private Card selectedCard;
-    //private final int HUMAN_PLAYER_ID = 0; // El jugador humano siempre es el primero en la lista de getAllPlayers()
+
+    // Lista para rastrear los hilos de la máquina.
+    private final List<Thread> activeGameThreads = new CopyOnWriteArrayList<>();
     private int currentTurnPlayerIndex = 0; // Para llevar el seguimiento de qué jugador tiene el turno
 
     @FXML
     public void initialize() {
         game = new Game();
         deck = game.getDeck();
-
-
 
         // Carta inicial en mesa + suma inicial correcta
         currentSum = 0;
@@ -77,7 +77,6 @@ public class GameController {
         if (paneLabelTimer != null) {
             paneLabelTimer.getChildren().add(timerLabel);
         }
-        timerLabel.start();
 
         // Desactivar el botón de reinicio al principio
         btnNewGame.setDisable(true);
@@ -87,7 +86,7 @@ public class GameController {
         if (container instanceof Pane pane) pane.getChildren().clear();
         else if (container instanceof Group group) group.getChildren().clear();
 
-        double overlap = -70;
+        double overlap = -65;
         int index = 0;
 
         for (Card c : cards) {
@@ -145,16 +144,24 @@ public class GameController {
         stackCardsLeftBox.getChildren().add(cardViewTable);
     }
 
+
     private void onCardClicked(Card selectedCard, ImageView cardView) {
+
         // Quitar estilo de selección previo
         if (selectedCardView != null) {
             selectedCardView.setScaleX(1.0);
             selectedCardView.setScaleY(1.0);
             selectedCardView.setStyle("");
+
+            // Devuelve la carta al fondo
+            if (selectedCardView.getParent() instanceof javafx.scene.layout.Pane parentPane) {
+                parentPane.toBack();
+            }
         }
 
         // Si clican la misma, deseleccionar
         if (selectedCardView == cardView) {
+
             selectedCardView.setScaleX(1.0);
             selectedCardView.setScaleY(1.0);
             selectedCardView = null;
@@ -172,13 +179,35 @@ public class GameController {
                         "-fx-border-radius: 5;"
         );
 
+        // Muestra la carta seleccionada al frente
+        if (cardView.getParent() instanceof javafx.scene.layout.Pane parentPane) {
+            parentPane.toFront();
+        }
+
         selectedCardView = cardView;
         this.selectedCard = selectedCard;
+
     }
 
     public void setStartGame(Player player, int numMachinePlayer) {
+
         this.game.setPlayer(player);
         this.game.setNumMachinePlayer(numMachinePlayer);
+
+        // Esto asegura que estén visibles y con sus nombres originales
+        // antes de la lógica de ocultamiento.
+        if (playerM1CardsBox != null) playerM1CardsBox.setVisible(true);
+        if (playerM2CardsBox != null) playerM2CardsBox.setVisible(true);
+        if (playerM3CardsBox != null) playerM3CardsBox.setVisible(true);
+
+        if (nicknameBot1Label != null) nicknameBot1Label.setText("Bot 1");
+        if (nicknameBot2Label != null) nicknameBot2Label.setText("Bot 2");
+        if (nicknameBot3Label != null) nicknameBot3Label.setText("Bot 3");
+
+        // Asegura que el botón de Nuevo Juego esté deshabilitado al empezar la partida
+        if (btnNewGame != null) {
+            btnNewGame.setDisable(true); // <--- Deshabilitar al iniciar un juego
+        }
 
         if (nickNameLabel != null) {
             nickNameLabel.setText(
@@ -221,7 +250,12 @@ public class GameController {
         game.setActualSum(initialValue);
         if (currentSumLabel != null) currentSumLabel.setText("Suma : " + currentSum);
 
-        // 4) Garantizar que empiece el humano
+        // 4) Arrancar el cronómetro antes de iniciar el primer turno
+        if (timerLabel != null) {
+            timerLabel.start();
+        }
+
+        // 5) Garantizar que empiece el humano
         currentTurnPlayerIndex = -1;
         startNextTurn();
     }
@@ -276,15 +310,15 @@ public class GameController {
     @FXML
     void howToPlayAction(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Instrucciones del Cincuentazo (50zo)");
-        alert.setHeaderText("Regla Principal: No exceder la Suma de 50.");
+        alert.setTitle("Instrucciones del Juego");
+        alert.setHeaderText("Regla Principal: ¡No te pases de 50!");
 
         String content =
                 "1. OBJETIVO: Ser el último jugador en pie.\n\n" +
                         "2. INICIO:\n" +
                         "   - Todos los jugadores reciben 4 cartas. El juego inicia con una carta en la mesa.\n\n" +
                         "3. VALORES DE CARTAS:\n" +
-                        "   - 2 a 8, 10: Suman su valor numérico.\n" +
+                        "   - 2 a 8 y 10: Suman su valor numérico.\n" +
                         "   - 9: Ni suma ni resta (Valor 0).\n" +
                         "   - J, Q, K: Restan 10.\n" +
                         "   - A (As): Suman 1 o 10 (según convenga para no exceder 50).\n\n" +
@@ -304,7 +338,17 @@ public class GameController {
         // 1. Detener el Cronómetro
         if (timerLabel != null) {
             timerLabel.stop();
+            timerLabel.resetTime();
         }
+
+        // ¡Importante! Detiene los hilos activos de Máquina.
+        for (Thread thread : activeGameThreads){
+            if (thread != null && thread.isAlive()){
+                System.out.println("Interrumpiendo hilo activo: " + thread.getName());
+                thread.interrupt(); // Esto activará el catch(InterruptedException) en el hilo
+            }
+        }
+        activeGameThreads.clear(); // Limpia la lista para un nuevo juego.
 
         // 2. Cerrar la ventana de juego actual
         Node sourceNode = (Node)event.getSource();
@@ -337,7 +381,7 @@ public class GameController {
             // **NUEVA LÓGICA DE VERIFICACIÓN Y ELIMINACIÓN**
             if (!hasValidMove(playerHand, currentSum)) {
                 // Eliminar al humano (HU-5)
-                System.out.println("Jugador Humano eliminado: no tiene jugadas válidas.");
+                System.out.println("Jugador Humano Eliminado: no tiene jugadas válidas.");
                 handleHumanElimination(); // **Llamar al nuevo método de eliminación**
                 return; // Detiene el flujo para que handleHumanElimination pase el turno
             }
@@ -384,6 +428,9 @@ public class GameController {
 
         // Pasa la mano de la máquina al hilo para que pueda decidir
         MachinePlayerThread machineThread = new MachinePlayerThread(this, machineId, machineHand);
+        // Rastrear el hilo
+        activeGameThreads.add(machineThread);
+
         machineThread.start();
     }
 
@@ -462,6 +509,10 @@ public class GameController {
     public void handleMachineElimination(int machineId) {
         // 1. Obtener el jugador máquina y sus cartas
         Player eliminatedPlayer = game.getMachinePlayers().get(machineId - 1);
+        // Imprime el jugador máquina eliminado
+        System.out.println("Jugador Máquina "
+                + eliminatedPlayer.getNickName()
+                + " Eliminado: no tiene jugadas válidas.");
         List<Card> hand = new ArrayList<>(eliminatedPlayer.getHand()); // Copia para evitar ConcurrentModification
 
         // 2. Devolver las cartas al mazo y remover al jugador del Modelo
@@ -509,10 +560,12 @@ public class GameController {
             showGameEndAlert(winner); // LLAMADA A LA ALERTA
         } else {
             // 5. Pasar al siguiente turno
-            // Asegurarse que el índice no exceda el nuevo tamaño de la lista
-            List<Player> allPlayers = game.getAllPlayers();
-            if (currentTurnPlayerIndex >= allPlayers.size()) {
-                currentTurnPlayerIndex = 0; // Vuelve al inicio si el índice se desbordó
+            // Compensación: Restamos 1 al índice.
+            currentTurnPlayerIndex--;
+
+            if (currentTurnPlayerIndex < 0) {
+                // Obtenemos el nuevo tamaño de la lista
+                currentTurnPlayerIndex = game.getAllPlayers().size() - 1;
             }
 
             // Llama a startNextTurn()
@@ -556,7 +609,14 @@ public class GameController {
             showGameEndAlert(winner); // LLAMADA A LA ALERTA
         } else {
             // 4. Pasar al siguiente turno (saltando la posición actual)
-            // Como el humano fue removido, el currentTurnPlayerIndex debe ajustarse.
+            // Compensamos el índice de la lista reducida.
+            currentTurnPlayerIndex--;
+
+            // Si el índice cae por debajo de 0 (lo cual sucede si el humano fue el 0),
+            // lo envolvemos al final de la lista de jugadores activos.
+            if (currentTurnPlayerIndex < 0) {
+                currentTurnPlayerIndex = game.getAllPlayers().size() - 1;
+            }
 
             // Simplemente llama a startNextTurn, que recalculará el índice
             // y pasará a la máquina.
