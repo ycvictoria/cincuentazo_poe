@@ -80,6 +80,11 @@ public class GameController {
 
         // Desactivar el botón de reinicio al principio
         btnNewGame.setDisable(true);
+
+        // El índice de turno se mantiene en 0 (Jugador Humano)
+        currentTurnPlayerIndex = 0;
+        // Los controles humanos se deshabilitan hasta que setStartGame los active.
+        enableHumanControls(false);
     }
 
     private void showCards(Object container, List<Card> cards, boolean faceUp) {
@@ -242,22 +247,8 @@ public class GameController {
             if (playerM3CardsBox != null) playerM3CardsBox.setVisible(false);
         }
 
-        // 3) Carta inicial en mesa (ahora sí, después de repartir)
-        Card tableCard = deck.drawCard();
-        showTableCard(tableCard);
-        int initialValue = game.evaluateCardEffect(tableCard, 0);
-        currentSum = initialValue;
-        game.setActualSum(initialValue);
-        if (currentSumLabel != null) currentSumLabel.setText("Suma : " + currentSum);
-
-        // 4) Arrancar el cronómetro antes de iniciar el primer turno
-        if (timerLabel != null) {
-            timerLabel.start();
-        }
-
-        // 5) Garantizar que empiece el humano
-        currentTurnPlayerIndex = -1;
-        startNextTurn();
+        System.out.println("Jugador: " + game.getPlayer().getNickName() + " num: " + numMachinePlayer);
+        runCurrentTurn(); // 4. Iniciar el juego
     }
 
 
@@ -372,13 +363,29 @@ public class GameController {
         // 1. Avanza al siguiente jugador
         List<Player> allPlayers = game.getAllPlayers();
         currentTurnPlayerIndex = (currentTurnPlayerIndex + 1) % allPlayers.size();
+        runCurrentTurn();
+    }
+    private void runCurrentTurn() {
+        List<Player> allPlayers = game.getAllPlayers();
+        // Maneja el caso de que solo quede un jugador (debería ser capturado en handle...Elimination)
+        if (allPlayers.isEmpty()) {
+            // Si la lista está vacía, es un error o un empate.
+            showGameEndAlert("Empate");
+            return;
+        }
+
+        // Asegurar que el índice no exceda el nuevo tamaño de la lista (en caso de eliminación)
+        if (currentTurnPlayerIndex >= allPlayers.size()) {
+            currentTurnPlayerIndex = 0; // Vuelve al inicio
+        }
+
         Player nextPlayer = allPlayers.get(currentTurnPlayerIndex);
 
         // 2. Determina si es humano o máquina
         if (nextPlayer.isHuman()) {
             System.out.println("Turno del Jugador Humano: " + nextPlayer.getNickName());
 
-            // **NUEVA LÓGICA DE VERIFICACIÓN Y ELIMINACIÓN**
+            // **LÓGICA DE VERIFICACIÓN Y ELIMINACIÓN**
             if (!hasValidMove(playerHand, currentSum)) {
                 // Eliminar al humano (HU-5)
                 System.out.println("Jugador Humano Eliminado: no tiene jugadas válidas.");
@@ -386,10 +393,11 @@ public class GameController {
                 return; // Detiene el flujo para que handleHumanElimination pase el turno
             }
 
-            enableHumanControls(true);
+            enableHumanControls(true); // Habilita la interacción
         } else {
             System.out.println("Turno de la Máquina: " + nextPlayer.getNickName());
-            enableHumanControls(false);
+            enableHumanControls(false); // Deshabilita la interacción del humano
+
             // Encuentra el ID de la máquina (ej: 1, 2, 3) basado en la lista de máquinas
             int machineId = game.getMachinePlayers().indexOf(nextPlayer) + 1;
             startMachineTurn(machineId); // Inicia el hilo
