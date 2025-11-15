@@ -18,6 +18,41 @@ public class MachinePlayerThread extends Thread {
         this.machineHand = hand;
     }
 
+    /*@Override
+    public void run() {
+        try {
+            // Lógica de DECISIÓN
+            Card cartaAJugar = findBestMove(gameController.getCurrentSum(), machineHand);
+
+            // 1. Tiempo de espera (2 a 4 segundos) para la TOMA DE DECISIÓN
+            int delayMs = new Random().nextInt(2001) + 2000; // 2000 a 4000 ms
+            Thread.sleep(delayMs);
+
+            // 2. Ejecutar TODAS las acciones del turno en el hilo de JavaFX
+            Platform.runLater(() -> {
+                if (cartaAJugar == null) {
+                    // Llama al método del controlador para manejar la eliminación
+                    gameController.handleMachineElimination(machinePlayerId);
+                } else {
+                    // Acción A: Jugar la carta (actualiza suma, inicia animación)
+                    gameController.handleMachinePlayCard(machinePlayerId, cartaAJugar);
+
+                    // Acción B: Tomar carta y pasar turno.
+                    // ¡IMPORTANTE! Si handleMachinePlayCard usa animaciones,
+                    // handleMachineDrawCard DEBERÍA ser llamado en el callback de esa animación
+                    // para garantizar que el turno no pase antes de que la animación termine.
+
+                    // Si handleMachinePlayCard NO USA CALLBACKS para pasar el turno:
+                    gameController.handleMachineDrawCard(machinePlayerId);
+                }
+            });
+
+        } catch (InterruptedException e) {
+            System.err.println("El hilo del jugador máquina " + machinePlayerId + " fue interrumpido y detenido.");
+            return;
+        }
+    }*/
+
     @Override
     public void run() {
         try {
@@ -46,22 +81,22 @@ public class MachinePlayerThread extends Thread {
             });
 
             // 3. Lógica para TOMAR CARTA DEL MAZO
-            // El tiempo de espera debe ser entre 1 y 4 segundos
-            delayMs = new Random().nextInt(2001) + 1000; // 2000 a 4000 ms
+            // El tiempo de espera debe ser entre 2 y 4 segundos
+            delayMs = new Random().nextInt(2001) + 2000; // 2000 a 4000 ms
             Thread.sleep(delayMs);
 
             // 4. Tomar carta y actualizar la GUI
             Platform.runLater(() -> {
                 // Llama al método del controlador que maneja la lógica de tomar carta y pasar turno
                 gameController.handleMachineDrawCard(machinePlayerId);
-             });
+            });
 
-            } catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             System.err.println("El hilo del jugador máquina " + machinePlayerId + " fue interrumpido y detenido.");
-                //Thread.currentThread().interrupt();
-                return; // Detiene la ejecución del hilo.
-            }
+            //Thread.currentThread().interrupt();
+            return; // Detiene la ejecución del hilo.
         }
+    }
 
     /**
      * Lógica de la IA (Debería estar en el modelo, pero por simplicidad la colocamos aquí).
