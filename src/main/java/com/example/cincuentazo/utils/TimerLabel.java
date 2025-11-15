@@ -55,7 +55,7 @@ public class TimerLabel extends HBox {
     }
 
     /** Reinicia el contador */
-    public void reset() {
+    public void resetTime() {
         stop();
         secondsElapsed = 0;
         timeLabel.setText(formatTime(secondsElapsed));

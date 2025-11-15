@@ -1,66 +1,57 @@
 package com.example.cincuentazo.controllers;
 
-import com.example.cincuentazo.models.Card;
-import com.example.cincuentazo.models.Deck;
-import com.example.cincuentazo.models.Game;
-import com.example.cincuentazo.models.Player;
+import com.example.cincuentazo.models.*;
+import com.example.cincuentazo.utils.Alerts50Game;
 import com.example.cincuentazo.utils.TimerLabel;
+import javafx.animation.Interpolator;
+import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Objects;
 
 public class GameController {
 
-    /*@FXML private HBox playerCardsBox;    // abajo (jugador humano)
-    @FXML private VBox playerM1CardsBox; // izquierda
-    @FXML private VBox playerM2CardsBox;  // arriba
-    @FXML private Group playerM3CardsBox;*/ // derecha
-    @FXML
-    private HBox playerCardsBox;      // Main player
+    @FXML private HBox playerCardsBox;      // Main player (abajo)
+    @FXML private VBox playerM1CardsBox;    // izquierda
+    @FXML private HBox playerM2CardsBox;    // arriba
+    @FXML private VBox playerM3CardsBox;    // derecha
+
+    @FXML private StackPane stackCardsBox;       // Carta visible en mesa
+    @FXML private StackPane stackCardsLeftBox;   // Mazo (back)
+
+    @FXML private Button btnAceptar;
+    @FXML private Button btnHowToPlay;
+    @FXML private Button btnNewGame;
 
     @FXML
-    private VBox playerM1CardsBox;    // left player <-
+    private Pane gamePane;
+    @FXML private Pane paneLabelTimer;
+    @FXML private Label nickNameLabel;
+    @FXML private Label nicknameBot1Label;
+    @FXML private Label nicknameBot2Label;
+    @FXML private Label nicknameBot3Label;
+    @FXML private Label currentSumLabel;
 
-    @FXML
-    private HBox playerM2CardsBox;    // up player
-
-    @FXML
-    private VBox playerM3CardsBox;    // right player ->
-
-    @FXML
-    private StackPane stackCardsBox;  // Mazo central
-
-    @FXML
-    private Button btnAceptar;        // Botón debajo del jugador
-
-    @FXML
-    private StackPane stackCardsLeftBox;  //Cards left box
-
-    @FXML
-    private Button btnHowToPlay;
-    @FXML
-    private Button btnNewGame;
-    @FXML
-    private Pane paneLabelTimer;
-    @FXML
-    private Label nickNameLabel;
-    @FXML
-    private Label nicknameBot1Label;
-
-    @FXML
-    private Label nicknameBot2Label;
-
-    @FXML
-    private Label nicknameBot3Label;
-    @FXML
-    private Label currentSumLabel;
     private TimerLabel timerLabel;
     private ImageView selectedCardView = null;
 
@@ -69,48 +60,43 @@ public class GameController {
     private List<Card> m1Hand;
     private List<Card> m2Hand;
     private List<Card> m3Hand;
+
     private Game game;
     private int currentSum;
     private Card selectedCard;
+    //private final int HUMAN_PLAYER_ID = 0; // El jugador humano siempre es el primero en la lista de getAllPlayers()
+    private int currentTurnPlayerIndex = 0; // Para llevar el seguimiento de qué jugador tiene el turno
+
     @FXML
     public void initialize() {
-
         game = new Game();
-        deck= game.getDeck();
+        deck = game.getDeck();
 
-        // Repartir 4 cartas a cada jugador
-        playerHand = deck.dealCards(4);
-        m1Hand = deck.dealCards(4);
-        m2Hand = deck.dealCards(4);
-        m3Hand = deck.dealCards(4);
-
-
-        // Mostrar cartas
-        showCards(playerCardsBox, playerHand, true);
-        showCards(playerM1CardsBox, m1Hand, false);
-        showCards(playerM2CardsBox, m2Hand, false);
-        showCards(playerM3CardsBox, m3Hand, false);
-
-
-        // Mostrar una carta inicial en la mesa
-        Card tableCard = deck.drawCard();
-        showTableCard(tableCard);
-        btnAceptar.setCursor(Cursor.HAND);
-
+        // Carta inicial en mesa + suma inicial correcta
         currentSum = 0;
-        selectedCard=null;
-        timerLabel= new TimerLabel("");
-        paneLabelTimer.getChildren().add( timerLabel);
-        timerLabel.start();
+        if (currentSumLabel != null) currentSumLabel.setText("Suma : 0");
+
+
+        btnAceptar.setCursor(Cursor.HAND);
+        selectedCard = null;
+
+        // Timer
+        timerLabel = new TimerLabel("");
+        if (paneLabelTimer != null) {
+            paneLabelTimer.getChildren().add(timerLabel);
+        }
+
+        // Desactivar el botón de reinicio al principio
+       // btnNewGame.setDisable(true);
+
     }
 
     private void showCards(Object container, List<Card> cards, boolean faceUp) {
         if (container instanceof Pane pane) pane.getChildren().clear();
         else if (container instanceof Group group) group.getChildren().clear();
 
-        double overlap = -70;
+        double overlap = -65;
         int index = 0;
-        int total = cards.size();
 
         for (Card c : cards) {
             Image image = faceUp
@@ -136,11 +122,8 @@ public class GameController {
             cardPane.setRotate(baseRotation);
             cardPane.setManaged(false);
 
-            if (container instanceof HBox) {
-                cardPane.setTranslateX(index * overlap);
-            } else {
-                cardPane.setTranslateY(index * overlap);
-            }
+            if (container instanceof HBox) cardPane.setTranslateX(index * overlap);
+            else cardPane.setTranslateY(index * overlap);
 
             if (container instanceof Pane pane) pane.getChildren().add(cardPane);
             else if (container instanceof Group group) group.getChildren().add(cardPane);
@@ -149,8 +132,8 @@ public class GameController {
         }
     }
 
-
     private void showTableCard(Card card) {
+        // Actualiza carta visible en mesa
         stackCardsBox.getChildren().clear();
         Image image = new Image(getClass().getResourceAsStream(card.getImagePath()));
         ImageView cardView = new ImageView(image);
@@ -158,33 +141,36 @@ public class GameController {
         cardView.setFitHeight(130);
         cardView.setPreserveRatio(true);
         stackCardsBox.getChildren().add(cardView);
-        ImageView cardViewTable = new ImageView(new Image(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png")));
+
+        // Evita acumular backs del mazo a la izquierda
+        stackCardsLeftBox.getChildren().clear();
+        ImageView cardViewTable = new ImageView(
+                new Image(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png"))
+        );
         cardViewTable.setFitWidth(90);
         cardViewTable.setFitHeight(130);
         cardViewTable.setPreserveRatio(true);
         stackCardsLeftBox.getChildren().add(cardViewTable);
     }
 
-
     private void onCardClicked(Card selectedCard, ImageView cardView) {
-        System.out.println("You clicked: " + selectedCard.getName() +
-                " (value " + selectedCard.getValueNumeric() + ")");
-
-        // Si había una carta seleccionada antes, le quitamos el borde
+        // Quitar estilo de selección previo
         if (selectedCardView != null) {
             selectedCardView.setScaleX(1.0);
             selectedCardView.setScaleY(1.0);
-            selectedCardView.setStyle(""); // limpia el estilo anterior
+            selectedCardView.setStyle("");
         }
 
-        // Si el usuario vuelve a hacer clic en la misma carta, la deselecciona
+        // Si clican la misma, deseleccionar
         if (selectedCardView == cardView) {
             selectedCardView.setScaleX(1.0);
             selectedCardView.setScaleY(1.0);
             selectedCardView = null;
+            this.selectedCard = null;
             return;
         }
 
+        // Nuevo estilo de selección
         cardView.setScaleX(1.1);
         cardView.setScaleY(1.1);
         cardView.setStyle(
@@ -193,41 +179,555 @@ public class GameController {
                         "-fx-border-width: 3;" +
                         "-fx-border-radius: 5;"
         );
-        // Guardar esta carta como la actualmente seleccionada
+
         selectedCardView = cardView;
         this.selectedCard = selectedCard;
-
     }
 
     public void setStartGame(Player player, int numMachinePlayer) {
         this.game.setPlayer(player);
         this.game.setNumMachinePlayer(numMachinePlayer);
-        if (nickNameLabel != null) {
-            if(nickNameLabel.getText().equals("")){
-                nickNameLabel.setText("Player");
-            }else{
-            nickNameLabel.setText(game.getPlayer().getNickName());}
-        }
-        System.out.println("Jugador: "+game.getPlayer().getNickName()+ " num: " +numMachinePlayer);
-    }
 
+        if (nickNameLabel != null) {
+            nickNameLabel.setText(
+                    (nickNameLabel.getText() == null || nickNameLabel.getText().isBlank())
+                            ? "Player"
+                            : game.getPlayer().getNickName()
+            );
+        }
+
+        // 1) Repartir a todos (humano + bots)
+        game.dealCards(4);
+
+        // 2) Manos visibles
+        playerHand = game.getPlayer().getHand();
+        showCards(playerCardsBox, playerHand, true);
+
+        if (numMachinePlayer >= 1) {
+            showCards(playerM1CardsBox, game.getMachinePlayers().get(0).getHand(), false);
+            if (nicknameBot1Label != null) nicknameBot1Label.setText(game.getMachinePlayers().get(0).getNickName());
+            nicknameBot2Label.setText("");
+            nicknameBot3Label.setText("");
+        } else {
+            if (playerM1CardsBox != null) playerM1CardsBox.setVisible(false);
+        }
+        if (numMachinePlayer >= 2) {
+            showCards(playerM2CardsBox, game.getMachinePlayers().get(1).getHand(), false);
+            if (nicknameBot2Label != null) nicknameBot2Label.setText(game.getMachinePlayers().get(1).getNickName());
+            nicknameBot3Label.setText("");
+        } else {
+            if (playerM2CardsBox != null) playerM2CardsBox.setVisible(false);
+        }
+        if (numMachinePlayer >= 3) {
+            showCards(playerM3CardsBox, game.getMachinePlayers().get(2).getHand(), false);
+            if (nicknameBot3Label != null) nicknameBot3Label.setText(game.getMachinePlayers().get(2).getNickName());
+        } else {
+            if (playerM3CardsBox != null) playerM3CardsBox.setVisible(false);
+        }
+
+        // 3) Carta inicial en mesa (ahora sí, después de repartir)
+        Card tableCard = deck.drawCard();
+        showTableCard(tableCard);
+        int initialValue = game.evaluateCardEffect(tableCard, 0);
+        currentSum = initialValue;
+        game.setActualSum(initialValue);
+        if (currentSumLabel != null) currentSumLabel.setText("Suma : " + currentSum);
+
+        // 4) Arrancar el cronómetro antes de iniciar el primer turno
+        if (timerLabel != null) {
+            timerLabel.start();
+        }
+
+        // 5) Garantizar que empiece el humano
+        currentTurnPlayerIndex = -1;
+        startNextTurn();
+    }
 
 
     @FXML
     void playCardAction(ActionEvent event) {
-        //Modificar este metodo para que muestre el valor de la suma actual en el label
-        if(selectedCard!=null){
-        currentSum+= selectedCard.getValueNumeric();
-        currentSumLabel.setText("Suma : "+String.valueOf(currentSum));  }
+        // Juega la carta seleccionada respetando la regla de no pasar de 50
+        if (selectedCard == null) return;
+
+        int gameValue = game.evaluateCardEffect(selectedCard, currentSum);
+        if (currentSum + gameValue > 50) {
+            System.out.println("Jugada inválida: excede 50.");
+            return;
+        }
+
+        // Actualizar suma y mesa
+        currentSum += gameValue;
+        game.setActualSum(currentSum);
+        if (currentSumLabel != null) {
+            currentSumLabel.setText("Suma : " + currentSum);
+        }
+
+        // Mover la carta seleccionada a la mesa (visual)
+        showTableCard(selectedCard);
+
+        // Remover de la mano del jugador
+        playerHand.remove(selectedCard);
+
+        // Robar una carta para mantener 4
+        Card newCard = deck.drawCard();
+        if (newCard != null) {
+            playerHand.add(newCard);
+        }
+
+        // Refrescar mano del jugador humano
+        showCards(playerCardsBox, playerHand, true);
+
+        // Limpiar selección
+        if (selectedCardView != null) {
+            selectedCardView.setScaleX(1.0);
+            selectedCardView.setScaleY(1.0);
+            selectedCardView.setStyle("");
+            selectedCardView = null;
+        }
+        selectedCard = null;
+
+        // Añadir: Pasa el turno al siguiente jugador
+        startNextTurn();
     }
+
     @FXML
     void howToPlayAction(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Instrucciones del Cincuentazo (50zo)");
+        alert.setHeaderText("Regla Principal: No exceder la Suma de 50.");
 
+        String content =
+                "1. OBJETIVO: Ser el último jugador en pie.\n\n" +
+                        "2. INICIO:\n" +
+                        "   - Todos los jugadores reciben 4 cartas. El juego inicia con una carta en la mesa.\n\n" +
+                        "3. VALORES DE CARTAS:\n" +
+                        "   - 2 a 8, 10: Suman su valor numérico.\n" +
+                        "   - 9: Ni suma ni resta (Valor 0).\n" +
+                        "   - J, Q, K: Restan 10.\n" +
+                        "   - A (As): Suman 1 o 10 (según convenga para no exceder 50).\n\n" +
+                        "4. TURNO:\n" +
+                        "   - Juega una carta sin exceder la suma de 50.\n" +
+                        "   - Roba una carta del mazo para mantener 4 en mano.\n\n" +
+                        "5. ELIMINACIÓN:\n" +
+                        "   - Un jugador es ELIMINADO si al inicio de su turno no tiene jugadas válidas (todas sus cartas exceden 50).\n" +
+                        "   - Las cartas eliminadas vuelven al mazo.";
+
+        alert.setContentText(content);
+        alert.showAndWait();
     }
+
 
     @FXML
     void newGameAction(ActionEvent event) {
 
+        Alerts50Game alertReload= new Alerts50Game();
+        boolean resp= alertReload.showConfirmationNewGame();
+        if(resp){
+            if (timerLabel != null) {
+                timerLabel.stop();
+            }
+            // 2. Cerrar la ventana de juego actual
+            Node sourceNode = (Node)event.getSource();
+            Stage currentStage = (Stage)sourceNode.getScene().getWindow();
+            currentStage.close();
+
+            try {
+                // 3. Abrir la WelcomeView para un nuevo juego
+                // Asumiendo que tu clase WelcomeView maneja la carga del FXML de bienvenida
+                com.example.cincuentazo.views.WelcomeView welcomeView =
+                        new com.example.cincuentazo.views.WelcomeView();
+                welcomeView.show();
+
+
+
+
+            } catch (Exception e) {
+                // Manejar cualquier error al intentar abrir la nueva vista
+                e.printStackTrace();
+            }
+        }
+
+
+    }
+
+    private void startNextTurn() {
+        // 1. Avanza al siguiente jugador
+        List<Player> allPlayers = game.getAllPlayers();
+        currentTurnPlayerIndex = (currentTurnPlayerIndex + 1) % allPlayers.size();
+        Player nextPlayer = allPlayers.get(currentTurnPlayerIndex);
+
+        // 2. Determina si es humano o máquina
+        if (nextPlayer.isHuman()) {
+            System.out.println("Turno del Jugador Humano: " + nextPlayer.getNickName());
+
+            // **NUEVA LÓGICA DE VERIFICACIÓN Y ELIMINACIÓN**
+            if (!hasValidMove(playerHand, currentSum)) {
+                // Eliminar al humano (HU-5)
+                System.out.println("Jugador Humano Eliminado: no tiene jugadas válidas.");
+                handleHumanElimination(); // **Llamar al nuevo método de eliminación**
+                return; // Detiene el flujo para que handleHumanElimination pase el turno
+            }
+
+            enableHumanControls(true);
+        } else {
+            System.out.println("Turno de la Máquina: " + nextPlayer.getNickName());
+            enableHumanControls(false);
+            // Encuentra el ID de la máquina (ej: 1, 2, 3) basado en la lista de máquinas
+            int machineId = game.getMachinePlayers().indexOf(nextPlayer) + 1;
+            startMachineTurn(machineId); // Inicia el hilo
+        }
+    }
+
+    /**
+     * Verifica si un jugador tiene alguna carta válida para jugar.
+     * Retorna true si hay una carta, false si debe ser eliminado.
+     */
+    private boolean hasValidMove(List<Card> hand, int currentSum) {
+        for (Card card : hand) {
+            int effect = game.evaluateCardEffect(card, currentSum);
+            if (currentSum + effect <= 50) {
+                return true; // Se encontró al menos una jugada válida
+            }
+        }
+        return false; // No hay jugadas válidas, debe ser eliminado
+    }
+
+    private void enableHumanControls(boolean enable) {
+        // Implementa la lógica para habilitar/deshabilitar los botones y la interacción con las cartas
+
+        btnAceptar.setDisable(!enable);
+        // Podrías necesitar un loop para deshabilitar los eventos onMouseClicked de las cartas,
+        // pero por ahora, deshabilitar el botón Aceptar es suficiente.
+    }
+
+    /**
+     * Inicia el turno del jugador máquina.
+     */
+    public void startMachineTurn(int machineId) {
+        enableHumanControls(false); // Deshabilita la interacción del humano
+
+        // El hilo necesita la mano de la máquina para tomar decisiones
+        List<Card> machineHand = game.getMachinePlayers().get(machineId - 1).getHand();
+
+        // Pasa la mano de la máquina al hilo para que pueda decidir
+        MachinePlayerThread machineThread = new MachinePlayerThread(this, machineId, machineHand);
+        machineThread.start();
+    }
+
+    /**
+     * Método llamado por el hilo para jugar la carta y actualizar la Vista.
+     * DEBE ser llamado dentro de Platform.runLater().
+     */
+    public void handleMachinePlayCard(int machineId, Card card) {
+        // 1. Actualiza el Modelo (simula playCardAction, pero para la máquina)
+        int gameValue = game.evaluateCardEffect(card, currentSum);
+        currentSum += gameValue;
+        game.setActualSum(currentSum);
+
+
+        // 2. Remover de la mano del jugador Máquina (en el Modelo)
+        game.getMachinePlayers().get(machineId - 1).removeCard(card);
+
+        // 4. Refrescar la mano de la máquina (visual, mostrando una carta menos)
+        // CAMBIO 1: Cambiar VBox a Object para que el switch funcione correctamente con HBox
+        Object containerM = switch (machineId) {
+            case 1 -> playerM1CardsBox;
+            case 2 -> playerM2CardsBox; // ⬅️ CORRECCIÓN: Asigna el HBox
+            case 3 -> playerM3CardsBox;
+            default -> throw new IllegalStateException("ID de máquina inválido: " + machineId);
+        };
+
+        // 2. Mover la carta seleccionada a la mesa (visual)
+        // 2. Dirección según la máquina
+        String direction = switch (machineId) {
+            case 1 -> "derecha";
+            case 2 -> "abajo";
+            case 3 -> "izquierda";
+            default -> "arriba";
+        };
+
+        if (containerM instanceof Pane) {
+            // Animación desde BOT → MAZO
+
+            // Mostrar carta en la mesa cuando la animación termine
+            animateCardFromPaneToDeck(card,direction, (Pane) containerM ,() -> {
+                // Mostrar carta en la mesa cuando la animación termine
+                showTableCard(card);
+                showCards(containerM, game.getMachinePlayers().get(machineId - 1).getHand(), false);
+                currentSumLabel.setText("Suma : " + currentSum);
+            });
+
+        }
+    }
+
+    /**
+     * Método llamado por el hilo para tomar carta y pasar el turno (en Platform.runLater).
+     */
+    public void handleMachineDrawCard(int machineId) {
+        // 1. Actualiza el Modelo (toma una carta del mazo)
+        Card newCard = deck.drawCard();
+        if (newCard != null) {
+            game.getMachinePlayers().get(machineId - 1).addCard(newCard);
+        }
+
+        // 2. Actualiza la Vista (mostrar la nueva carta en la mano, si es necesario)
+        // Refrescar mano de la máquina (mostrar 4 cartas de nuevo)
+        Object container = switch (machineId) {
+            case 1 -> playerM1CardsBox;
+            case 2 -> playerM2CardsBox;
+            case 3 -> playerM3CardsBox;
+            default -> throw new IllegalStateException("ID de máquina inválido: " + machineId);
+        };
+        // 2. Dirección según la máquina
+        String direction = switch (machineId) {
+            case 1 -> "izquierda";
+            case 2 -> "arriba";
+            case 3 -> "derecha";
+            default -> "arriba";
+        };
+
+        // 3. Animación desde el mazo → luego mostrar carta en mesa
+
+        if (container instanceof Pane) {
+
+            animateCardFromDeck(direction,  () -> {
+                // Mostrar carta en la mesa cuando la animación termine
+                showCards(container, game.getMachinePlayers().get(machineId - 1).getHand(), false);
+            });
+            // showCards(container, game.getMachinePlayers().get(machineId - 1).getHand(), false);
+        }
+
+        // 3. Pasa el turno al siguiente jugador (humano o máquina)
+        startNextTurn();
+    }
+
+
+    public int getCurrentSum() {
+        return currentSum;
+    }
+
+    public Game getGame() {
+        return game;
+    }
+
+    /**
+     * Maneja la lógica de la eliminación de un jugador máquina.
+     * * Reglas: El jugador eliminado devuelve sus cartas al mazo, y se verifica el fin del juego.
+     * @param machineId ID de la máquina a eliminar (1, 2 o 3).
+     */
+    public void handleMachineElimination(int machineId) {
+        // 1. Obtener el jugador máquina y sus cartas
+        Player eliminatedPlayer = game.getMachinePlayers().get(machineId - 1);
+        // Imprime el jugador máquina eliminado
+        System.out.println("Jugador Máquina "
+                + eliminatedPlayer.getNickName()
+                + " Eliminado: no tiene jugadas válidas.");
+        List<Card> hand = new ArrayList<>(eliminatedPlayer.getHand()); // Copia para evitar ConcurrentModification
+
+        // 2. Devolver las cartas al mazo y remover al jugador del Modelo
+        game.returnCardsToDeck(hand); // Necesita que implementes este método en Game.java
+        game.getMachinePlayers().remove(eliminatedPlayer);
+
+        // 3. Actualizar la GUI
+        Object container = switch (machineId) {
+            case 1 -> playerM1CardsBox;
+            case 2 -> playerM2CardsBox;
+            case 3 -> playerM3CardsBox;
+            default -> null;
+        };
+        if (container instanceof Pane) {
+            // Limpia el contenedor de cartas y lo oculta
+            ((Pane) container).getChildren().clear();
+            ((Pane) container).setVisible(false);
+        }
+
+        Label nicknameLabel = switch (machineId) {
+            case 1 -> nicknameBot1Label;
+            case 2 -> nicknameBot2Label;
+            case 3 -> nicknameBot3Label;
+            default -> null;
+        };
+        if (nicknameLabel != null) nicknameLabel.setText("ELIMINADO");
+
+        // 4. Verificar fin del juego (Solo queda un jugador o menos)
+        if (game.getAllPlayers().size() <= 1) {
+            // Aquí va la lógica de HU-6 (Fin del juego)
+
+            String winner;
+            if (game.getAllPlayers().isEmpty()) {
+                // No debería ocurrir.
+                winner = "¡ERROR! Nadie quedó.";
+
+                // Si la lista está vacía, es un error o un empate.
+                System.err.println("¡Error de conteo! La lista de jugadores quedó vacía.");
+                winner = "Empate";
+            } else {
+                // El ganador es el único jugador restante (humano o máquina)
+                winner = game.getAllPlayers().get(0).getNickName();
+            }
+
+            showGameEndAlert(winner); // LLAMADA A LA ALERTA
+        } else {
+            // 5. Pasar al siguiente turno
+            // Asegurarse que el índice no exceda el nuevo tamaño de la lista
+            List<Player> allPlayers = game.getAllPlayers();
+            if (currentTurnPlayerIndex >= allPlayers.size()) {
+                currentTurnPlayerIndex = 0; // Vuelve al inicio si el índice se desbordó
+            }
+
+            // Llama a startNextTurn()
+            startNextTurn();
+        }
+    }
+
+    /**
+     * Maneja la lógica de la eliminación del jugador humano.
+     */
+    public void handleHumanElimination() {
+        // 1. Devolver cartas al mazo y remover al jugador del Modelo
+        game.returnCardsToDeck(playerHand);
+        game.setPlayer(null); // Quitar al jugador humano del modelo principal
+
+        // 2. Actualizar la GUI del humano
+        playerCardsBox.getChildren().clear();
+        nickNameLabel.setText("ELIMINADO");
+        enableHumanControls(false); // Deshabilitar botones
+
+        // Habilitar el botón de Nuevo Juego
+        btnNewGame.setDisable(false);
+
+        // 3. Verificar fin del juego
+        if (game.getAllPlayers().size() <= 1) {
+            // Lógica de (Fin del juego)
+            String winner;
+            if (game.getAllPlayers().isEmpty()) {
+                // No debería ocurrir.
+                winner = "¡ERROR! Nadie quedó."; // Dejamos esto solo para traza de error
+
+                // Si la lista está vacía, es un error o un empate.
+                System.err.println("¡Error de conteo! La lista de jugadores quedó vacía.");
+                winner = "Empate";
+            } else {
+                // El ganador es el único jugador restante (la máquina)
+                winner = game.getAllPlayers().get(0).getNickName();
+            }
+
+            System.out.println("¡FIN DEL JUEGO! Ganador: " + winner);
+            showGameEndAlert(winner); // LLAMADA A LA ALERTA
+        } else {
+            // 4. Pasar al siguiente turno (saltando la posición actual)
+            // Compensamos el índice de la lista reducida.
+            currentTurnPlayerIndex--;
+
+            // Si el índice cae por debajo de 0 (lo cual sucede si el humano fue el 0),
+            // lo envolvemos al final de la lista de jugadores activos.
+            if (currentTurnPlayerIndex < 0) {
+                currentTurnPlayerIndex = game.getAllPlayers().size() - 1;
+            }
+
+            // Simplemente llama a startNextTurn, que recalculará el índice
+            // y pasará a la máquina.
+            startNextTurn();
+        }
+    }
+
+    private void showGameEndAlert(String winner) {
+        if (timerLabel != null) {
+            timerLabel.stop();
+        }
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("¡Fin del Juego!");
+
+        if (winner.equals("NADIE")) {
+            alert.setHeaderText("¡Juego Terminado!");
+            alert.setContentText("Parece que todos los jugadores han sido eliminados. ¡Nadie gana!");
+        } else {
+            alert.setHeaderText("¡FELICITACIONES!");
+            alert.setContentText("¡El ganador es: " + winner + "!");
+        }
+
+        alert.showAndWait();
+
+        // Habilitar el botón después de que el juego termine
+        btnNewGame.setDisable(false);
+    }
+
+
+
+    //animacion para repartir la carta del mazo despues de jugar la carta
+    private void animateCardFromDeck( String direction, Runnable onFinished) {
+        // 1. Crear ImageView temporal con la imagen de la carta
+
+        ImageView temp_cardView = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png"))));
+        temp_cardView.setFitWidth(90);
+        temp_cardView.setFitHeight(130);
+
+        // 2. Obtener posición global del stackCardsLeftBox
+        Bounds bounds = stackCardsLeftBox.localToScene(stackCardsLeftBox.getBoundsInLocal());
+
+        // 3. Posicionarlo sobre el mazo
+        temp_cardView.setLayoutX(bounds.getMinX());
+        temp_cardView.setLayoutY(bounds.getMinY()-100);
+
+        // 4. Agregarlo al rootPane (un panel que cubra toda tu escena)
+        gamePane.getChildren().add(temp_cardView);
+
+        // 5. Animación de movimiento
+        TranslateTransition tt = new TranslateTransition(Duration.millis(1000), temp_cardView);
+
+        switch (direction.toLowerCase()) {
+            case "arriba" -> tt.setByY(-70);
+            case "abajo" -> tt.setByY(70);
+            case "derecha" -> tt.setByX(-40);
+            case "izquierda" -> tt.setByX(200);
+        }
+        tt.setInterpolator(Interpolator.EASE_BOTH);
+
+        // 6. Cuando termine, ejecutar callback y eliminar la carta animada
+        tt.setOnFinished(e -> {
+            gamePane.getChildren().remove(temp_cardView);
+            if (onFinished != null) onFinished.run();
+        });
+
+        tt.play();
+    }
+
+    //animacion para repartir la carta del mazo despues de jugar la carta
+    private void animateCardFromPaneToDeck( Card card,String direction, Pane pane,Runnable onFinished) {
+        // 1. Crear ImageView temporal con la imagen de la carta
+        ImageView temp_cardView = new ImageView(card.getImage());
+       // ImageView temp_cardView = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png"))));
+        temp_cardView.setFitWidth(90);
+        temp_cardView.setFitHeight(130);
+
+        // 2. Obtener posición global del stackCardsLeftBox
+      //  Bounds bounds = stackCardsLeftBox.localToScene(stackCardsBox.getBoundsInLocal());
+        Bounds bounds = pane.localToScene(pane.getBoundsInLocal());
+        // 3. Posicionarlo sobre el mazo
+        temp_cardView.setLayoutX(bounds.getMinX());
+        temp_cardView.setLayoutY(bounds.getMinY()-100);
+
+        // 4. Agregarlo al rootPane (un panel que cubra toda tu escena)
+        gamePane.getChildren().add(temp_cardView);
+
+        // 5. Animación de movimiento
+        TranslateTransition tt = new TranslateTransition(Duration.millis(800), temp_cardView);
+
+        switch (direction.toLowerCase()) {
+            case "arriba" -> tt.setByY(-70);
+            case "abajo" -> tt.setByY(70);
+            case "derecha" -> tt.setByX(-20);
+            case "izquierda" -> tt.setByX(70);
+        }
+        tt.setInterpolator(Interpolator.EASE_BOTH);
+
+        // 6. Cuando termine,  eliminar la carta animada
+        tt.setOnFinished(e -> {
+            gamePane.getChildren().remove(temp_cardView);if (onFinished != null) onFinished.run();
+        });
+
+        tt.play();
     }
 
 
