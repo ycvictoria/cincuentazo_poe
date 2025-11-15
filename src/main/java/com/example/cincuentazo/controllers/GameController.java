@@ -64,7 +64,8 @@ public class GameController {
     private Game game;
     private int currentSum;
     private Card selectedCard;
-    //private final int HUMAN_PLAYER_ID = 0; // El jugador humano siempre es el primero en la lista de getAllPlayers()
+    // Lista para rastrear los hilos de la máquina.
+    private final List<Thread> activeGameThreads = new CopyOnWriteArrayList<>();
     private int currentTurnPlayerIndex = 0; // Para llevar el seguimiento de qué jugador tiene el turno
 
     @FXML
@@ -159,10 +160,16 @@ public class GameController {
             selectedCardView.setScaleX(1.0);
             selectedCardView.setScaleY(1.0);
             selectedCardView.setStyle("");
+
+            // Devuelve la carta al fondo
+            if (selectedCardView.getParent() instanceof javafx.scene.layout.Pane parentPane) {
+                parentPane.toBack();
+            }
         }
 
         // Si clican la misma, deseleccionar
         if (selectedCardView == cardView) {
+
             selectedCardView.setScaleX(1.0);
             selectedCardView.setScaleY(1.0);
             selectedCardView = null;
@@ -179,6 +186,11 @@ public class GameController {
                         "-fx-border-width: 3;" +
                         "-fx-border-radius: 5;"
         );
+
+        // Muestra la carta seleccionada al frente
+        if (cardView.getParent() instanceof javafx.scene.layout.Pane parentPane) {
+            parentPane.toFront();
+        }
 
         selectedCardView = cardView;
         this.selectedCard = selectedCard;
@@ -319,13 +331,24 @@ public class GameController {
 
     @FXML
     void newGameAction(ActionEvent event) {
-
         Alerts50Game alertReload= new Alerts50Game();
         boolean resp= alertReload.showConfirmationNewGame();
         if(resp){
+            // 1. Detener el Cronómetro
             if (timerLabel != null) {
                 timerLabel.stop();
+                timerLabel.resetTime();
             }
+
+            // ¡Importante! Detiene los hilos activos de Máquina.
+            for (Thread thread : activeGameThreads){
+                if (thread != null && thread.isAlive()){
+                    System.out.println("Interrumpiendo hilo activo: " + thread.getName());
+                    thread.interrupt(); // Esto activará el catch(InterruptedException) en el hilo
+                }
+            }
+            activeGameThreads.clear(); // Limpia la lista para un nuevo juego.
+
             // 2. Cerrar la ventana de juego actual
             Node sourceNode = (Node)event.getSource();
             Stage currentStage = (Stage)sourceNode.getScene().getWindow();
@@ -337,17 +360,10 @@ public class GameController {
                 com.example.cincuentazo.views.WelcomeView welcomeView =
                         new com.example.cincuentazo.views.WelcomeView();
                 welcomeView.show();
-
-
-
-
             } catch (Exception e) {
                 // Manejar cualquier error al intentar abrir la nueva vista
                 e.printStackTrace();
-            }
-        }
-
-
+            }}
     }
 
     private void startNextTurn() {
