@@ -46,8 +46,8 @@ public class MachinePlayerThread extends Thread {
             });
 
             // 3. Lógica para TOMAR CARTA DEL MAZO
-            // El tiempo de espera debe ser entre 2 y 4 segundos
-            delayMs = new Random().nextInt(2001) + 2000; // 2000 a 4000 ms
+            // El tiempo de espera debe ser entre 1 y 4 segundos
+            delayMs = new Random().nextInt(2001) + 1000; // 2000 a 4000 ms
             Thread.sleep(delayMs);
 
             // 4. Tomar carta y actualizar la GUI

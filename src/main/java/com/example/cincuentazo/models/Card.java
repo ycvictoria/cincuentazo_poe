@@ -43,6 +43,10 @@ public class Card {
 */
 package com.example.cincuentazo.models;
 
+import javafx.scene.image.Image;
+
+import java.util.Objects;
+
 public class Card {
     private final String name;
     private final String suit;
@@ -64,5 +68,9 @@ public class Card {
     @Override
     public String toString() {
         return name + " of " + suit;
+    }
+
+    public Image getImage() {
+        return new Image(Objects.requireNonNull(getClass().getResourceAsStream(imagePath)));
     }
 }

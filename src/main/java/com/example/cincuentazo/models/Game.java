@@ -1,6 +1,7 @@
 package com.example.cincuentazo.models;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Game {
@@ -32,11 +33,28 @@ public class Game {
 
     private void createMachinePlayers() {
         machinePlayers.clear();
-        for (int i = 1; i <= numMachinePlayer; i++) {
-            machinePlayers.add(new Player("Bot " + i, false));
+
+        List<String> uniqueNames = generateUniqueBotNames(numMachinePlayer);
+
+        for (String name : uniqueNames) {
+            machinePlayers.add(new Player(name, false));
         }
     }
 
+
+    private List<String> generateUniqueBotNames(int count) {
+        List<String> names = new ArrayList<>(List.of(
+                "Astra", "Nexo", "Vex", "Luma", "Zyon", "Kora", "Hexa", "Volt",
+                "Pixel", "Nova", "Cyra", "Rexel", "Zero", "Flux", "Orin", "Vanta", "Nyx",
+                "Ciri", "Axo", "Meko")
+        );
+
+        // Mezcla los nombres para que salgan en orden aleatorio
+        Collections.shuffle(names);
+
+        // Devuelve solo los que necesitas, sin repetir
+        return names.subList(0, Math.min(count, names.size()));
+    }
     /** Humano + bots (si el humano es null, solo bots) */
     public List<Player> getAllPlayers() {
         List<Player> all = new ArrayList<>();

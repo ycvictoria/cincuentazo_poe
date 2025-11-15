@@ -16,7 +16,7 @@ public class Alerts50Game extends AlertAdapter {
      */
     public boolean showConfirmationNewGame( ) {
         String title= "NUEVO JUEGO";
-        String message= "¿QUIERES INICIAR \nUN NUEVO SUDOKU?\nRecuerda que los datos actuales se borrarán";
+        String message= "¿QUIERES INICIAR \nUN NUEVO CINCUENTAZO?\nRecuerda que los datos actuales se borrarán";
         return super.showConfirmation(title, message);
     }
 

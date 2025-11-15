@@ -20,5 +20,6 @@ public class WelcomeView extends Stage {
         this.setTitle("Cincuentazo - Menú Principal");
         this.centerOnScreen();
 
+
     }
 }

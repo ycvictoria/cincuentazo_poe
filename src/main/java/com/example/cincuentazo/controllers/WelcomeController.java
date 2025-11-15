@@ -52,19 +52,20 @@ public class WelcomeController extends Stage {
 
         Player player = new Player(nickname, true);
         player.setNickname(nickname);
-
         System.out.println(player.getNickName());
         System.out.println("Iniciando juego con " + numMaquinas + " jugadores CPU...");
 
-        GameView gameView = GameView.getInstance();
-        gameView.getGameController().setStartGame(player, num);
-        gameView.show();
+
 
         // Cierre de la ventana actual
         Node sourceNode = (Node)event.getSource();
         Scene scene = sourceNode.getScene();
         Stage stage = (Stage)scene.getWindow();
         stage.close();
+        //GameView gameView = GameView.getInstance();
+        GameView gameView= new GameView();
+        gameView.getGameController().setStartGame(player, num);
+        gameView.show();
     }
 
     @FXML
@@ -78,6 +79,7 @@ public class WelcomeController extends Stage {
 
         comboJugadores.getItems().addAll(1, 2, 3);
         comboJugadores.setPromptText("Selecciona");
+        comboJugadores.setValue(1);
         startGameBtn.setCursor(Cursor.HAND);
         startGameBtn.setDefaultButton(true);
     }
@@ -91,3 +93,4 @@ public class WelcomeController extends Stage {
         alert.showAndWait();
     }
 }
+
