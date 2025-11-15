@@ -11,8 +11,7 @@
 <?import javafx.scene.paint.Stop?>
 <?import javafx.scene.text.Font?>
 
-
-<Pane prefHeight="608.0" prefWidth="645.0" style="-fx-background-color: #2E8B57;" xmlns="http://javafx.com/javafx/17.0.14" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cincuentazo.controllers.GameController">
+<Pane prefHeight="620.0" prefWidth="645.0" style="-fx-background-color: #2E8B57;" xmlns="http://javafx.com/javafx/17.0.14" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cincuentazo.controllers.GameController">
    <children>
       <Pane layoutX="14.0" layoutY="97.0" prefHeight="513.0" prefWidth="630.0" style="-fx-background-color: #2E8B57;">
          <children>
@@ -27,15 +26,15 @@
 
                             <!-- Derecha -->
                 <VBox fx:id="playerM1CardsBox" alignment="CENTER" layoutX="505.0" layoutY="329.0" style="-fx-background-color: yellow;" />
-            <Pane layoutX="14.0" layoutY="376.0" prefHeight="132.0" prefWidth="593.0">
+            <Pane layoutX="14.0" layoutY="376.0" prefHeight="140.0" prefWidth="600.0">
                <children>
                         <HBox fx:id="playerCardsBox" alignment="CENTER" layoutX="377.0" layoutY="14.0" prefHeight="8.0" prefWidth="231.0" spacing="10" />
-                  <Label fx:id="nickNameLabel" layoutX="120.0" layoutY="90.0" text="Nickname" textFill="#e4d615">
+                        <Button fx:id="btnAceptar" alignment="CENTER" contentDisplay="CENTER" layoutX="243.0" layoutY="88.0" onAction="#playCardAction" prefHeight="25.0" style="-fx-background-color: #ffdd47; -fx-text-fill: #2E8B57; -fx-font-weight: bold;" text="Seleccionar Carta" />
+                  <Label fx:id="nickNameLabel" alignment="BOTTOM_CENTER" contentDisplay="CENTER" layoutX="137.0" layoutY="87.0" text="Nickname" textAlignment="CENTER" textFill="#e4d615">
                      <font>
                         <Font name="System Bold" size="17.0" />
                      </font>
                   </Label>
-                        <Button fx:id="btnAceptar" alignment="CENTER" contentDisplay="CENTER" layoutX="224.0" layoutY="90.0" onAction="#playCardAction" prefHeight="25.0" prefWidth="120.0" style="-fx-background-color: #ffdd47; -fx-text-fill: #2E8B57; -fx-font-weight: bold;" text="Seleccionar Carta" />
                   <Label fx:id="nicknameBot3Label" layoutX="28.0" layoutY="14.0" text="Bot 3" textFill="#e4d615">
                      <font>
                         <Font name="System Bold" size="17.0" />
@@ -63,7 +62,7 @@
       </Pane>
 
                     <!-- Encabezado -->
-        <HBox alignment="CENTER_LEFT" prefHeight="97.0" prefWidth="600" style="-fx-background-color: #2E8B57;">
+        <HBox alignment="CENTER_LEFT" prefHeight="97.0" prefWidth="600.0" style="-fx-background-color: #2E8B57;">
             <children>
             <Label prefHeight="58.0" prefWidth="431.0" style="-fx-background-color: #2E8B57;" text=" CINCUENTAZO">
                <font>
@@ -86,10 +85,10 @@
                   </LinearGradient>
                </textFill>
             </Label>
-                <Pane prefHeight="91.0" prefWidth="247.0" HBox.hgrow="ALWAYS">
+                <Pane prefHeight="91.0" prefWidth="230.0" HBox.hgrow="ALWAYS">
                <children>
-                      <Button fx:id="btnHowToPlay" layoutX="134.0" layoutY="19.0" onAction="#howToPlayAction" style="-fx-background-color: #ffdd47; -fx-text-fill: #2E8B57; -fx-font-weight: bold;" text="¿Cómo jugar?" />
                   <Pane fx:id="paneLabelTimer" layoutX="14.0" layoutY="29.0" prefHeight="40.0" prefWidth="70.0" />
+                      <Button fx:id="btnHowToPlay" layoutX="134.0" layoutY="19.0" onAction="#howToPlayAction" style="-fx-background-color: #ffdd47; -fx-text-fill: #2E8B57; -fx-font-weight: bold;" text="¿Cómo jugar?" />
                   <Button fx:id="btnNewGame" layoutX="135.0" layoutY="59.0" onAction="#newGameAction" style="-fx-background-color: #ffdd47; -fx-text-fill: #2E8B57; -fx-font-weight: bold;" text="Nuevo Juego" />
                </children>
             </Pane>

@@ -17,6 +17,8 @@ public class WelcomeView extends Stage {
         Scene scene = new Scene(root);
         this.setScene(scene);
         this.setResizable(false);
+        this.setTitle("Cincuentazo - Menú Principal");
+        this.centerOnScreen();
 
     }
 }

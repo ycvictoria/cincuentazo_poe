@@ -60,4 +60,9 @@ public class Deck {
     public List<Card> getCards() {
         return cards;
     }
+
+    public void addToBottom(Card c) {
+        cards.add(c);
+    }
+
 }

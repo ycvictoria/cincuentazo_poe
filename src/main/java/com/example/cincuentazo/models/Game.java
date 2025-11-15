@@ -112,13 +112,15 @@ public class Game {
 
     /**
      * Devuelve las cartas de un jugador eliminado o de la mesa al mazo y baraja.
-     * @param cardsToReturn La lista de cartas a devolver.
+     * @param cards La lista de cartas a devolver.
      */
-    public void returnCardsToDeck(List<Card> cardsToReturn) {
-        // Agrega las cartas de vuelta a la lista principal del mazo
-        deck.getCards().addAll(cardsToReturn);
-
-        // Baraja el mazo para redistribuir las cartas devueltas
+    public void returnCardsToDeck(List<Card> cards) {
+        if (cards == null || cards.isEmpty()) return;
+        for (Card c : cards) {
+            deck.addToBottom(c);  // implementar en Deck
+        }
+        cards.clear();
         deck.shuffle();
     }
+
 }
