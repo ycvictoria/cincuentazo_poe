@@ -24,10 +24,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.Objects;
 
 public class GameController {
 
@@ -67,6 +65,9 @@ public class GameController {
     // Lista para rastrear los hilos de la máquina.
     private final List<Thread> activeGameThreads = new CopyOnWriteArrayList<>();
     private int currentTurnPlayerIndex = 0; // Para llevar el seguimiento de qué jugador tiene el turno
+
+    private final Map<Player, Pane> playerContainerMap = new HashMap<>();
+    private final Map<Player, Integer> playerPositionMap = new HashMap<>(); // 1=Izquierda, 2=Arriba, 3=Derecha
 
     @FXML
     public void initialize() {
@@ -215,24 +216,38 @@ public class GameController {
         playerHand = game.getPlayer().getHand();
         showCards(playerCardsBox, playerHand, true);
 
+        List<Player> machinePlayers = game.getMachinePlayers();
+
         if (numMachinePlayer >= 1) {
-            showCards(playerM1CardsBox, game.getMachinePlayers().get(0).getHand(), false);
-            if (nicknameBot1Label != null) nicknameBot1Label.setText(game.getMachinePlayers().get(0).getNickName());
-            nicknameBot2Label.setText("");
-            nicknameBot3Label.setText("");
+            Player p1 = machinePlayers.get(0); // Instancia del bot en la Posición 1 (Izquierda)
+            showCards(playerM1CardsBox, p1.getHand(), false);
+            if (nicknameBot1Label != null) nicknameBot1Label.setText(p1.getNickName());
+
+            // Mapeo Fijo: La instancia p1 siempre usa playerM1CardsBox
+            playerContainerMap.put(p1, playerM1CardsBox);
+            playerPositionMap.put(p1, 1);
         } else {
             if (playerM1CardsBox != null) playerM1CardsBox.setVisible(false);
         }
         if (numMachinePlayer >= 2) {
-            showCards(playerM2CardsBox, game.getMachinePlayers().get(1).getHand(), false);
-            if (nicknameBot2Label != null) nicknameBot2Label.setText(game.getMachinePlayers().get(1).getNickName());
-            nicknameBot3Label.setText("");
+            Player p2 = machinePlayers.get(1); // Instancia del bot en la Posición 2 (Arriba)
+            showCards(playerM2CardsBox, p2.getHand(), false);
+            if (nicknameBot2Label != null) nicknameBot2Label.setText(p2.getNickName());
+
+            // Mapeo Fijo: La instancia p2 siempre usa playerM2CardsBox
+            playerContainerMap.put(p2, playerM2CardsBox);
+            playerPositionMap.put(p2, 2);
         } else {
             if (playerM2CardsBox != null) playerM2CardsBox.setVisible(false);
         }
         if (numMachinePlayer >= 3) {
-            showCards(playerM3CardsBox, game.getMachinePlayers().get(2).getHand(), false);
-            if (nicknameBot3Label != null) nicknameBot3Label.setText(game.getMachinePlayers().get(2).getNickName());
+            Player p3 = machinePlayers.get(2); // Instancia del bot en la Posición 2 (Arriba)
+            showCards(playerM3CardsBox, p3.getHand(), false);
+            if (nicknameBot3Label != null) nicknameBot3Label.setText(p3.getNickName());
+
+            // Mapeo Fijo: La instancia p2 siempre usa playerM2CardsBox
+            playerContainerMap.put(p3, playerM3CardsBox);
+            playerPositionMap.put(p3, 3);
         } else {
             if (playerM3CardsBox != null) playerM3CardsBox.setVisible(false);
         }
@@ -427,6 +442,8 @@ public class GameController {
 
         // Pasa la mano de la máquina al hilo para que pueda decidir
         MachinePlayerThread machineThread = new MachinePlayerThread(this, machineId, machineHand);
+        // Rastrear el hilo
+        activeGameThreads.add(machineThread);
         machineThread.start();
     }
 
@@ -435,44 +452,45 @@ public class GameController {
      * DEBE ser llamado dentro de Platform.runLater().
      */
     public void handleMachinePlayCard(int machineId, Card card) {
-        // 1. Actualiza el Modelo (simula playCardAction, pero para la máquina)
+
+        // 1. OBTENER LA INSTANCIA del jugador usando el índice DINÁMICO
+        Player currentPlayer = game.getMachinePlayers().get(machineId - 1);
+
+        // 2. OBTENER EL CONTENEDOR VISUAL y la POSICIÓN usando la INSTANCIA FIJA
+        Pane containerM = playerContainerMap.get(currentPlayer);
+        Integer fixedPosition = playerPositionMap.get(currentPlayer);
+
+        // Verificar si el mapeo es válido o si el contenedor ya está oculto (eliminado)
+        if (containerM == null || fixedPosition == null || !containerM.isVisible()) {
+            // Si el bot fue eliminado o hay un error de mapeo, salimos.
+            return;
+        }
+
+        // 3. Dirección basada en la POSICIÓN FIJA (1, 2, 3)
+        String direction = switch (fixedPosition) {
+            case 1 -> "derecha";   // Posición Izquierda -> Mover a la derecha
+            case 2 -> "abajo";     // Posición Arriba -> Mover hacia abajo
+            case 3 -> "izquierda"; // Posición Derecha -> Mover a la izquierda
+            default -> "arriba";
+        };
+
+        // 4. Actualizar el Modelo (simula playCardAction)
         int gameValue = game.evaluateCardEffect(card, currentSum);
         currentSum += gameValue;
         game.setActualSum(currentSum);
 
+        // 5. Remover la carta del Modelo
+        currentPlayer.removeCard(card);
 
-        // 2. Remover de la mano del jugador Máquina (en el Modelo)
-        game.getMachinePlayers().get(machineId - 1).removeCard(card);
-
-        // 4. Refrescar la mano de la máquina (visual, mostrando una carta menos)
-        // CAMBIO 1: Cambiar VBox a Object para que el switch funcione correctamente con HBox
-        Object containerM = switch (machineId) {
-            case 1 -> playerM1CardsBox;
-            case 2 -> playerM2CardsBox; // ⬅️ CORRECCIÓN: Asigna el HBox
-            case 3 -> playerM3CardsBox;
-            default -> throw new IllegalStateException("ID de máquina inválido: " + machineId);
-        };
-
-        // 2. Mover la carta seleccionada a la mesa (visual)
-        // 2. Dirección según la máquina
-        String direction = switch (machineId) {
-            case 1 -> "derecha";
-            case 2 -> "abajo";
-            case 3 -> "izquierda";
-            default -> "arriba";
-        };
-
+        // 6. Ejecutar Animación y Callbacks
         if (containerM instanceof Pane) {
-            // Animación desde BOT → MAZO
-
-            // Mostrar carta en la mesa cuando la animación termine
-            animateCardFromPaneToDeck(card,direction, (Pane) containerM ,() -> {
-                // Mostrar carta en la mesa cuando la animación termine
+            // Animación desde BOT → MESA
+            animateCardFromPaneToDeck(card, direction, containerM, () -> {
+                // Callback al terminar la animación:
                 showTableCard(card);
-                showCards(containerM, game.getMachinePlayers().get(machineId - 1).getHand(), false);
+                showCards(containerM, currentPlayer.getHand(), false);
                 currentSumLabel.setText("Suma : " + currentSum);
             });
-
         }
     }
 
@@ -480,41 +498,46 @@ public class GameController {
      * Método llamado por el hilo para tomar carta y pasar el turno (en Platform.runLater).
      */
     public void handleMachineDrawCard(int machineId) {
-        // 1. Actualiza el Modelo (toma una carta del mazo)
-        Card newCard = deck.drawCard();
-        if (newCard != null) {
-            game.getMachinePlayers().get(machineId - 1).addCard(newCard);
+
+        // 1. OBTENER LA INSTANCIA del jugador usando el índice DINÁMICO
+        Player currentPlayer = game.getMachinePlayers().get(machineId - 1);
+
+        // 2. OBTENER EL CONTENEDOR VISUAL y la POSICIÓN usando la INSTANCIA FIJA
+        Pane container = playerContainerMap.get(currentPlayer);
+        Integer fixedPosition = playerPositionMap.get(currentPlayer);
+
+        if (container == null || fixedPosition == null) {
+            // Si hay error de mapeo, saltamos el turno y pasamos al siguiente.
+            startNextTurn();
+            return;
         }
 
-        // 2. Actualiza la Vista (mostrar la nueva carta en la mano, si es necesario)
-        // Refrescar mano de la máquina (mostrar 4 cartas de nuevo)
-        Object container = switch (machineId) {
-            case 1 -> playerM1CardsBox;
-            case 2 -> playerM2CardsBox;
-            case 3 -> playerM3CardsBox;
-            default -> throw new IllegalStateException("ID de máquina inválido: " + machineId);
-        };
-        // 2. Dirección según la máquina
-        String direction = switch (machineId) {
-            case 1 -> "izquierda";
-            case 2 -> "arriba";
-            case 3 -> "derecha";
+        // 3. Dirección según la POSICIÓN FIJA (1, 2, 3)
+        String direction = switch (fixedPosition) {
+            case 1 -> "izquierda"; // Posición Izquierda -> Anima hacia la izquierda
+            case 2 -> "arriba";    // Posición Arriba -> Anima hacia arriba
+            case 3 -> "derecha";   // Posición Derecha -> Anima hacia la derecha
             default -> "arriba";
         };
 
-        // 3. Animación desde el mazo → luego mostrar carta en mesa
-
-        if (container instanceof Pane) {
-
-            animateCardFromDeck(direction,  () -> {
-                // Mostrar carta en la mesa cuando la animación termine
-                showCards(container, game.getMachinePlayers().get(machineId - 1).getHand(), false);
-            });
-            // showCards(container, game.getMachinePlayers().get(machineId - 1).getHand(), false);
+        // 4. Actualiza el Modelo (toma una carta del mazo)
+        Card newCard = deck.drawCard();
+        if (newCard != null) {
+            currentPlayer.addCard(newCard);
         }
 
-        // 3. Pasa el turno al siguiente jugador (humano o máquina)
-        startNextTurn();
+        // 5. Animación desde el mazo → luego mostrar carta en mano
+        if (container.isVisible()) { // Solo animar si el bot no fue eliminado
+            animateCardFromDeck(direction,  () -> {
+                // Callback al terminar la animación:
+                showCards(container, currentPlayer.getHand(), false);
+                // Pasar el turno al finalizar la animación
+                startNextTurn();
+            });
+        } else {
+            // Si el contenedor no es visible, simplemente pasamos el turno sin animación.
+            startNextTurn();
+        }
     }
 
 
@@ -585,10 +608,16 @@ public class GameController {
             showGameEndAlert(winner); // LLAMADA A LA ALERTA
         } else {
             // 5. Pasar al siguiente turno
-            // Asegurarse que el índice no exceda el nuevo tamaño de la lista
-            List<Player> allPlayers = game.getAllPlayers();
-            if (currentTurnPlayerIndex >= allPlayers.size()) {
-                currentTurnPlayerIndex = 0; // Vuelve al inicio si el índice se desbordó
+
+            // Solución: Decrementar el índice para COMPENSAR la reducción de la lista.
+            // Esto asegura que startNextTurn() avance al jugador que acaba de
+            // moverse al índice del eliminado.
+            currentTurnPlayerIndex--;
+
+            // Si el índice cae por debajo de 0 (lo cual sucede si el jugador eliminado
+            // estaba en el índice 0), lo envolvemos al final de la lista.
+            if (currentTurnPlayerIndex < 0) {
+                currentTurnPlayerIndex = game.getAllPlayers().size() - 1;
             }
 
             // Llama a startNextTurn()
@@ -690,13 +719,13 @@ public class GameController {
         gamePane.getChildren().add(temp_cardView);
 
         // 5. Animación de movimiento
-        TranslateTransition tt = new TranslateTransition(Duration.millis(1000), temp_cardView);
+        TranslateTransition tt = new TranslateTransition(Duration.millis(800), temp_cardView);
 
         switch (direction.toLowerCase()) {
-            case "arriba" -> tt.setByY(-70);
-            case "abajo" -> tt.setByY(70);
-            case "derecha" -> tt.setByX(-40);
-            case "izquierda" -> tt.setByX(200);
+            case "arriba" -> tt.setByY(-150);
+            case "abajo" -> tt.setByY(80);
+            case "derecha" -> tt.setByX(-150);
+            case "izquierda" -> tt.setByX(250);
         }
         tt.setInterpolator(Interpolator.EASE_BOTH);
 
@@ -728,13 +757,13 @@ public class GameController {
         gamePane.getChildren().add(temp_cardView);
 
         // 5. Animación de movimiento
-        TranslateTransition tt = new TranslateTransition(Duration.millis(800), temp_cardView);
+        TranslateTransition tt = new TranslateTransition(Duration.millis(700), temp_cardView);
 
         switch (direction.toLowerCase()) {
-            case "arriba" -> tt.setByY(-70);
-            case "abajo" -> tt.setByY(70);
-            case "derecha" -> tt.setByX(-20);
-            case "izquierda" -> tt.setByX(70);
+            case "arriba" -> tt.setByY(-90);
+            case "abajo" -> tt.setByY(90);
+            case "derecha" -> tt.setByX(-175);
+            case "izquierda" -> tt.setByX(220);
         }
         tt.setInterpolator(Interpolator.EASE_BOTH);
 
