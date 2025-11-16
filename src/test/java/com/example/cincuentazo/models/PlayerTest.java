@@ -5,8 +5,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Prueba unitaria para la clase player verificando que
+ * Se maneje el nombre del jugador y las cartas correctamente
+ */
 public class PlayerTest {
-
+    /**
+     * Verifica la correcta inicialización del jugador, y que funcione
+     * Añadir y remover cartas de la mano.
+     */
     @Test
     void testInitialization() {
         // Iniciamos datos para la prueba
@@ -45,7 +52,10 @@ public class PlayerTest {
         assertTrue(player.getHand().contains(card2), "La carta restante (card2) debe permanecer.");
     }
 
-@Test
+    /**
+     * Verifica la funcionalidad de cmabio de nickname y asegura que el tipo de jugador se mantenga constante.
+     */
+    @Test
     void testNickName() {
     //Iniciamos los parametros para iniciar la prueba
     String initialName = "Bot_1";
