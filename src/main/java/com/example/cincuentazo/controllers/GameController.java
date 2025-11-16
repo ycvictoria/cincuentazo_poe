@@ -89,7 +89,7 @@ public class GameController {
         }
 
         // Desactivar el botón de reinicio al principio
-       // btnNewGame.setDisable(true);
+        // btnNewGame.setDisable(true);
 
     }
 
@@ -742,12 +742,12 @@ public class GameController {
     private void animateCardFromPaneToDeck( Card card,String direction, Pane pane,Runnable onFinished) {
         // 1. Crear ImageView temporal con la imagen de la carta
         ImageView temp_cardView = new ImageView(card.getImage());
-       // ImageView temp_cardView = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png"))));
+        // ImageView temp_cardView = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png"))));
         temp_cardView.setFitWidth(90);
         temp_cardView.setFitHeight(130);
 
         // 2. Obtener posición global del stackCardsLeftBox
-      //  Bounds bounds = stackCardsLeftBox.localToScene(stackCardsBox.getBoundsInLocal());
+        //  Bounds bounds = stackCardsLeftBox.localToScene(stackCardsBox.getBoundsInLocal());
         Bounds bounds = pane.localToScene(pane.getBoundsInLocal());
         // 3. Posicionarlo sobre el mazo
         temp_cardView.setLayoutX(bounds.getMinX());
