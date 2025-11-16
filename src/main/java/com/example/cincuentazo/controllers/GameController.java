@@ -23,26 +23,26 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * Clase controladora principal para la interfaz de usuario del juego Cincuentazo.
+ * Gestiona el estado del juego, las interacciones del jugador humano, la lógica de los
+ * jugadores máquina (bots) a través de hilos, las animaciones de las cartas y el
+ * flujo general del juego (turnos, eliminación y victoria).
+ */
 public class GameController {
 
     @FXML private HBox playerCardsBox;      // Main player (abajo)
     @FXML private VBox playerM1CardsBox;    // izquierda
     @FXML private HBox playerM2CardsBox;    // arriba
     @FXML private VBox playerM3CardsBox;    // derecha
-
     @FXML private StackPane stackCardsBox;       // Carta visible en mesa
     @FXML private StackPane stackCardsLeftBox;   // Mazo (back)
-
     @FXML private Button btnAceptar;
-    @FXML private Button btnHowToPlay;
     @FXML private Button btnNewGame;
-
-    @FXML
-    private Pane gamePane;
+    @FXML private Pane gamePane;
     @FXML private Pane paneLabelTimer;
     @FXML private Label nickNameLabel;
     @FXML private Label nicknameBot1Label;
@@ -52,12 +52,8 @@ public class GameController {
 
     private TimerLabel timerLabel;
     private ImageView selectedCardView = null;
-
     private Deck deck;
     private List<Card> playerHand;
-    private List<Card> m1Hand;
-    private List<Card> m2Hand;
-    private List<Card> m3Hand;
 
     private Game game;
     private int currentSum;
@@ -65,34 +61,34 @@ public class GameController {
     // Lista para rastrear los hilos de la máquina.
     private final List<Thread> activeGameThreads = new CopyOnWriteArrayList<>();
     private int currentTurnPlayerIndex = 0; // Para llevar el seguimiento de qué jugador tiene el turno
-
     private final Map<Player, Pane> playerContainerMap = new HashMap<>();
     private final Map<Player, Integer> playerPositionMap = new HashMap<>(); // 1=Izquierda, 2=Arriba, 3=Derecha
 
+    /**
+     * Inicia el controlador
+     */
     @FXML
     public void initialize() {
         game = new Game();
         deck = game.getDeck();
-
         // Carta inicial en mesa + suma inicial correcta
         currentSum = 0;
         if (currentSumLabel != null) currentSumLabel.setText("Suma : 0");
-
-
         btnAceptar.setCursor(Cursor.HAND);
         selectedCard = null;
-
         // Timer
         timerLabel = new TimerLabel("");
         if (paneLabelTimer != null) {
             paneLabelTimer.getChildren().add(timerLabel);
         }
-
-        // Desactivar el botón de reinicio al principio
-        // btnNewGame.setDisable(true);
-
     }
 
+    /**
+     *
+     * @param container El contenedor con (pane, HBox, VBox, Group).
+     * @param cards Lista de carta a mostrar.
+     * @param faceUp Da la instrucción que si la carta se muestra boca arriba(true) o abajo (false).
+     */
     private void showCards(Object container, List<Card> cards, boolean faceUp) {
         if (container instanceof Pane pane) pane.getChildren().clear();
         else if (container instanceof Group group) group.getChildren().clear();
@@ -134,6 +130,11 @@ public class GameController {
         }
     }
 
+    /**
+     * Muestra la carta inicial en la mesa y actualiza las que tire cada jugador.
+     * Muestra que en el mazo se muestre el dorso de una carta.
+     * @param card Carta que se coloca en la mesa.
+     */
     private void showTableCard(Card card) {
         // Actualiza carta visible en mesa
         stackCardsBox.getChildren().clear();
@@ -144,7 +145,7 @@ public class GameController {
         cardView.setPreserveRatio(true);
         stackCardsBox.getChildren().add(cardView);
 
-        // Evita acumular backs del mazo a la izquierda
+        // Asegura la visibilidad del mazo a la izquierda
         stackCardsLeftBox.getChildren().clear();
         ImageView cardViewTable = new ImageView(
                 new Image(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png"))
@@ -155,6 +156,11 @@ public class GameController {
         stackCardsLeftBox.getChildren().add(cardViewTable);
     }
 
+    /**
+     * Se encarga de mostrar el efecto de seleccionar o deseleccionar a la carta.
+     * @param selectedCard la carta a la que se le da clic
+     * @param cardView La imageView de la carta que se le da clic
+     */
     private void onCardClicked(Card selectedCard, ImageView cardView) {
         // Quitar estilo de selección previo
         if (selectedCardView != null) {
@@ -197,10 +203,15 @@ public class GameController {
         this.selectedCard = selectedCard;
     }
 
+    /**
+     * Se encarga de iniciar la partida, la cantidad de jugadores y organizar las cartas iniciales.
+     * @param player El jugador humano
+     * @param numMachinePlayer Numero de jugadores maquina a incluir.
+     */
     public void setStartGame(Player player, int numMachinePlayer) {
         this.game.setPlayer(player);
         this.game.setNumMachinePlayer(numMachinePlayer);
-
+       //nombre del jugador humano
         if (nickNameLabel != null) {
             nickNameLabel.setText(
                     (nickNameLabel.getText() == null || nickNameLabel.getText().isBlank())
@@ -208,21 +219,17 @@ public class GameController {
                             : game.getPlayer().getNickName()
             );
         }
-
         // 1) Repartir a todos (humano + bots)
         game.dealCards(4);
-
-        // 2) Manos visibles
+        // 2) Manos visibles (humano) y manos ocultas (bots)
         playerHand = game.getPlayer().getHand();
         showCards(playerCardsBox, playerHand, true);
-
         List<Player> machinePlayers = game.getMachinePlayers();
-
+        //Configuración de los bots y mapeo de contenedores visuales
         if (numMachinePlayer >= 1) {
             Player p1 = machinePlayers.get(0); // Instancia del bot en la Posición 1 (Izquierda)
             showCards(playerM1CardsBox, p1.getHand(), false);
             if (nicknameBot1Label != null) nicknameBot1Label.setText(p1.getNickName());
-
             // Mapeo Fijo: La instancia p1 siempre usa playerM1CardsBox
             playerContainerMap.put(p1, playerM1CardsBox);
             playerPositionMap.put(p1, 1);
@@ -252,7 +259,7 @@ public class GameController {
             if (playerM3CardsBox != null) playerM3CardsBox.setVisible(false);
         }
 
-        // 3) Carta inicial en mesa (ahora sí, después de repartir)
+        // 3) Carta inicial en mesa
         Card tableCard = deck.drawCard();
         showTableCard(tableCard);
         int initialValue = game.evaluateCardEffect(tableCard, 0);
@@ -270,7 +277,13 @@ public class GameController {
         startNextTurn();
     }
 
-
+    /**
+     * Controla la acción de jugar una carta.
+     * Válida si la carta es válida, actualiza la suma y la carta visible en la mesa.
+     * Se encarga de remover la carta de la mano del jugador y roba una para mantener las 4 cartas.
+     * Pasa el turno.
+     * @param event maneja el evento del boton seleccionar carta.
+     */
     @FXML
     void playCardAction(ActionEvent event) {
         // Juega la carta seleccionada respetando la regla de no pasar de 50
@@ -317,6 +330,11 @@ public class GameController {
         startNextTurn();
     }
 
+    /**
+     * Muestra una alerta mostrando las instrucciones al jugador.
+     * @param event evento para mostrar ventana al presionar el boton
+     */
+
     @FXML
     void howToPlayAction(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -343,7 +361,11 @@ public class GameController {
         alert.showAndWait();
     }
 
-
+    /**
+     * Se encarga de iniciar un nuevo juego
+     * al presionar el botón detiene los hilos activos, cierra la venta actual y abre la vista de bienvenida.
+     * @param event botón para reiniciar o iniciar nuevo juego.
+     */
     @FXML
     void newGameAction(ActionEvent event) {
         Alerts50Game alertReload= new Alerts50Game();
@@ -381,19 +403,22 @@ public class GameController {
             }}
     }
 
+    /**
+     * Avanza al siguiente jugador en el turno.
+     * 1. Determina quién es el siguiente jugador.
+     * 2. Verifica si el jugador tiene movimientos válidos (si no, lo elimina).
+     * 3. Habilita el control humano o inicia el hilo del bot.
+     */
     private void startNextTurn() {
         // 1. Avanza al siguiente jugador
         List<Player> allPlayers = game.getAllPlayers();
         currentTurnPlayerIndex = (currentTurnPlayerIndex + 1) % allPlayers.size();
         Player nextPlayer = allPlayers.get(currentTurnPlayerIndex);
-
         // 2. Determina si es humano o máquina
         if (nextPlayer.isHuman()) {
             System.out.println("Turno del Jugador Humano: " + nextPlayer.getNickName());
-
-            // **NUEVA LÓGICA DE VERIFICACIÓN Y ELIMINACIÓN**
             if (!hasValidMove(playerHand, currentSum)) {
-                // Eliminar al humano (HU-5)
+                // Eliminar al humano
                 System.out.println("Jugador Humano Eliminado: no tiene jugadas válidas.");
                 handleHumanElimination(); // **Llamar al nuevo método de eliminación**
                 return; // Detiene el flujo para que handleHumanElimination pase el turno
@@ -410,8 +435,10 @@ public class GameController {
     }
 
     /**
-     * Verifica si un jugador tiene alguna carta válida para jugar.
-     * Retorna true si hay una carta, false si debe ser eliminado.
+     * Verifica si en la mano del jugador hay al menos una carta que pueda usar para jugar válida.
+     * @param hand mazo de cartas a verificar.
+     * @param currentSum suma actual.
+     * @return retorna si hay al menos una carta válida para jugar
      */
     private boolean hasValidMove(List<Card> hand, int currentSum) {
         for (Card card : hand) {
@@ -423,23 +450,22 @@ public class GameController {
         return false; // No hay jugadas válidas, debe ser eliminado
     }
 
+    /**
+     * Habilita o deshabilita los controles para el jugador humano.
+     * @param enable true habilita y false deshabilita
+     */
     private void enableHumanControls(boolean enable) {
-        // Implementa la lógica para habilitar/deshabilitar los botones y la interacción con las cartas
-
         btnAceptar.setDisable(!enable);
-        // Podrías necesitar un loop para deshabilitar los eventos onMouseClicked de las cartas,
-        // pero por ahora, deshabilitar el botón Aceptar es suficiente.
     }
 
     /**
-     * Inicia el turno del jugador máquina.
+     * Inicia el turno del jugador máquina con hilos para no interferir con la interfaz.
+     * @param machineId Id de jugador maquina.
      */
     public void startMachineTurn(int machineId) {
         enableHumanControls(false); // Deshabilita la interacción del humano
-
         // El hilo necesita la mano de la máquina para tomar decisiones
         List<Card> machineHand = game.getMachinePlayers().get(machineId - 1).getHand();
-
         // Pasa la mano de la máquina al hilo para que pueda decidir
         MachinePlayerThread machineThread = new MachinePlayerThread(this, machineId, machineHand);
         // Rastrear el hilo
@@ -448,8 +474,9 @@ public class GameController {
     }
 
     /**
-     * Método llamado por el hilo para jugar la carta y actualizar la Vista.
-     * DEBE ser llamado dentro de Platform.runLater().
+     * Metodo utilizado por los hilos para jugar la carta, actualizar la vista y el modelo
+     * @param machineId el id de la maquina que esta jugando.
+     * @param card carta elegida por el jugador maquina
      */
     public void handleMachinePlayCard(int machineId, Card card) {
 
@@ -495,7 +522,8 @@ public class GameController {
     }
 
     /**
-     * Método llamado por el hilo para tomar carta y pasar el turno (en Platform.runLater).
+     * Metodo usado por los hilos para robar la carta del mazo y pasar el turno.
+     * @param machineId id del jugador que roba la carta.
      */
     public void handleMachineDrawCard(int machineId) {
 
@@ -540,18 +568,25 @@ public class GameController {
         }
     }
 
-
+    /**
+     * Devuelve la suma actual de la mesa.
+     * @return suma actual.
+     */
     public int getCurrentSum() {
         return currentSum;
     }
 
+    /**
+     * Devuelve la instancia del juego.
+     * @return la instancia de game
+     */
     public Game getGame() {
         return game;
     }
 
     /**
      * Maneja la lógica de la eliminación de un jugador máquina.
-     * * Reglas: El jugador eliminado devuelve sus cartas al mazo, y se verifica el fin del juego.
+     * El jugador eliminado devuelve sus cartas al mazo, y se verifica el fin del juego.
      * @param machineId ID de la máquina a eliminar (1, 2 o 3).
      */
     public void handleMachineElimination(int machineId) {
@@ -627,6 +662,7 @@ public class GameController {
 
     /**
      * Maneja la lógica de la eliminación del jugador humano.
+     * Devuelve sus cartas al mazo, lo elimina del modelo, y verifica las condiciones del fin del juego.
      */
     public void handleHumanElimination() {
         // 1. Devolver cartas al mazo y remover al jugador del Modelo
@@ -663,19 +699,21 @@ public class GameController {
             // 4. Pasar al siguiente turno (saltando la posición actual)
             // Compensamos el índice de la lista reducida.
             currentTurnPlayerIndex--;
-
             // Si el índice cae por debajo de 0 (lo cual sucede si el humano fue el 0),
             // lo envolvemos al final de la lista de jugadores activos.
             if (currentTurnPlayerIndex < 0) {
                 currentTurnPlayerIndex = game.getAllPlayers().size() - 1;
             }
-
             // Simplemente llama a startNextTurn, que recalculará el índice
             // y pasará a la máquina.
             startNextTurn();
         }
     }
 
+    /**
+     * Muestra una alerta del fin del juego, anunciando al ganador.
+     * @param winner nombre del ganador
+     */
     private void showGameEndAlert(String winner) {
         if (timerLabel != null) {
             timerLabel.stop();
@@ -692,35 +730,31 @@ public class GameController {
             alert.setContentText("¡El ganador es: " + winner + "!");
         }
 
-        alert.showAndWait();
+        alert.show();
 
         // Habilitar el botón después de que el juego termine
         btnNewGame.setDisable(false);
     }
 
-
-
-    //animacion para repartir la carta del mazo despues de jugar la carta
+    /**
+     * Animación de robar una carta del mazo hacia el área del jugador.
+     * @param direction Dirección en la que viaja la carta.
+     * @param onFinished Un {@code Runnable} que se ejecuta cuando la animación termina.
+     */
     private void animateCardFromDeck( String direction, Runnable onFinished) {
         // 1. Crear ImageView temporal con la imagen de la carta
-
         ImageView temp_cardView = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png"))));
         temp_cardView.setFitWidth(90);
         temp_cardView.setFitHeight(130);
-
         // 2. Obtener posición global del stackCardsLeftBox
         Bounds bounds = stackCardsLeftBox.localToScene(stackCardsLeftBox.getBoundsInLocal());
-
         // 3. Posicionarlo sobre el mazo
         temp_cardView.setLayoutX(bounds.getMinX());
         temp_cardView.setLayoutY(bounds.getMinY()-100);
-
         // 4. Agregarlo al rootPane (un panel que cubra toda tu escena)
         gamePane.getChildren().add(temp_cardView);
-
         // 5. Animación de movimiento
         TranslateTransition tt = new TranslateTransition(Duration.millis(800), temp_cardView);
-
         switch (direction.toLowerCase()) {
             case "arriba" -> tt.setByY(-150);
             case "abajo" -> tt.setByY(80);
@@ -728,37 +762,34 @@ public class GameController {
             case "izquierda" -> tt.setByX(250);
         }
         tt.setInterpolator(Interpolator.EASE_BOTH);
-
         // 6. Cuando termine, ejecutar callback y eliminar la carta animada
         tt.setOnFinished(e -> {
             gamePane.getChildren().remove(temp_cardView);
             if (onFinished != null) onFinished.run();
         });
-
         tt.play();
     }
 
-    //animacion para repartir la carta del mazo despues de jugar la carta
+    /**
+     * Animación del juego de una carta por parte del jugador.
+     * @param card Carta que se juega
+     * @param direction Dirección de la carta jugada
+     * @param pane posición del jugador que sirve como punto de partida de la carta.
+     * @param onFinished Un {@code Runnable} que se ejecuta cuando la animación termina.
+     */
     private void animateCardFromPaneToDeck( Card card,String direction, Pane pane,Runnable onFinished) {
         // 1. Crear ImageView temporal con la imagen de la carta
         ImageView temp_cardView = new ImageView(card.getImage());
-        // ImageView temp_cardView = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png"))));
         temp_cardView.setFitWidth(90);
         temp_cardView.setFitHeight(130);
-
         // 2. Obtener posición global del stackCardsLeftBox
-        //  Bounds bounds = stackCardsLeftBox.localToScene(stackCardsBox.getBoundsInLocal());
         Bounds bounds = pane.localToScene(pane.getBoundsInLocal());
         // 3. Posicionarlo sobre el mazo
         temp_cardView.setLayoutX(bounds.getMinX());
         temp_cardView.setLayoutY(bounds.getMinY()-100);
-
-        // 4. Agregarlo al rootPane (un panel que cubra toda tu escena)
         gamePane.getChildren().add(temp_cardView);
-
         // 5. Animación de movimiento
         TranslateTransition tt = new TranslateTransition(Duration.millis(700), temp_cardView);
-
         switch (direction.toLowerCase()) {
             case "arriba" -> tt.setByY(-90);
             case "abajo" -> tt.setByY(90);
@@ -766,14 +797,10 @@ public class GameController {
             case "izquierda" -> tt.setByX(220);
         }
         tt.setInterpolator(Interpolator.EASE_BOTH);
-
-        // 6. Cuando termine,  eliminar la carta animada
+        // 6. Cuando termine, eliminar la carta animada
         tt.setOnFinished(e -> {
             gamePane.getChildren().remove(temp_cardView);if (onFinished != null) onFinished.run();
         });
-
         tt.play();
     }
-
-
 }

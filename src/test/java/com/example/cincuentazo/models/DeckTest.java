@@ -7,7 +7,7 @@ import java.util.List;
 public class DeckTest {
 
     /**
-     * Prueba 1: Verifica que el constructor inicialice el mazo con 52 cartas
+     * Verifica que el constructor inicialice el mazo con 52 cartas
      * únicas (4 palos x 13 rangos) y que la funcionalidad de
      * cartas restantes sea correcta antes de repartir.
      */
@@ -21,18 +21,17 @@ public class DeckTest {
                 "El mazo debe inicializarse con 52 cartas.");
 
         // 2. Verificar las cartas restantes inmediatamente después de la inicialización
-        // y la mezcla (shuffle), que pone currentIndex a 0.
         assertEquals(EXPECTED_TOTAL_CARDS, deck.remainingCards(),
                 "Al inicio, el número de cartas restantes debe ser 52.");
 
-        // 3. Opcional: Verificar que las 52 cartas sean únicas
+        // 3. Verificar que las 52 cartas sean únicas
         long uniqueCardsCount = deck.getCards().stream().distinct().count();
         assertEquals(EXPECTED_TOTAL_CARDS, uniqueCardsCount,
                 "Todas las cartas en el mazo deben ser únicas.");
     }
 
     /**
-     * Prueba 2: Verifica la funcionalidad de drawCard y dealCards,
+     * Verifica la funcionalidad de drawCard y dealCards,
      * y cómo afecta al conteo de cartas restantes.
      */
     @Test
@@ -44,7 +43,7 @@ public class DeckTest {
         assertEquals(INITIAL_REMAINING, deck.remainingCards(),
                 "El mazo debe comenzar con 52 cartas restantes.");
 
-        // ACT 1: Repartir 5 cartas
+        // Repartir 5 cartas
         List<Card> hand = deck.dealCards(CARDS_TO_DEAL);
 
         //después del reparto

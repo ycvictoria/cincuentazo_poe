@@ -12,12 +12,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * Pruebas unitarias para la clase Game, verificando la lógica central del juego.
  */
 public class GameTest {
-
     private Game game;
 
     /**
-     * Helper para crear cartas con el constructor requerido.
-     * Calcula el valor numérico base a partir del nombre (rango).
+     * Método para crear una instancia de card
+     * @param name nombre de la carta
+     * @param suit palo de la carta
+     * @return Una intancia de card
      */
     private Card createCard(String name, String suit) {
         int valueNumeric;
@@ -53,6 +54,9 @@ public class GameTest {
         return cards;
     }
 
+    /**
+     * Inicia la configuración del juego para las pruebas
+     */
     @BeforeEach
     void setUp() {
         // Inicializa Game y el jugador humano antes de cada prueba (Estado limpio)
@@ -116,6 +120,9 @@ public class GameTest {
         assertTrue(cardA.toString().contains("H"), "La representación de la carta debe contener su palo (H).");
     }
 
+    /**
+     * Verifica que los valores dados a las cartas funcionen correctamente.
+     */
     @Test
     void testEvaluateCard() {
         Card cardKing = createCard("K", "H");    // Figura -> -10
@@ -141,6 +148,9 @@ public class GameTest {
                 "El As debe sumar 1 si sumar 10 hace que la suma exceda 50.");
     }
 
+    /**
+     * Verifica si las cartas del 2 al 8 sumen su valor.
+     */
     @Test
     void testEvaluateCardE() {
         Card cardTwo = createCard("2", "C");
