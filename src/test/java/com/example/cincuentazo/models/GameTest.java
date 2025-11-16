@@ -61,32 +61,29 @@ public class GameTest {
         game.setPlayer(playerHuman);
     }
 
-    // -------------------------------------------------------------------------
-    // PRUEBAS NUEVAS (Basadas en Deck y Card)
-    // -------------------------------------------------------------------------
 
     /**
      * Verifica que el mazo inicial tenga 52 cartas y que el barajado cambie el orden.
      */
     @Test
-    void testDeckIsAlways52CardsAndShuffled() {
-        // ARRANGE: Crear un mazo de referencia. Asumimos que new Deck() produce un orden inicial predecible.
+    void testDeckIsAlways52(){
+        //Crear un mazo de referencia. Asumimos que new Deck() produce un orden inicial predecible.
         Deck orderedDeck = new Deck();
 
-        // ACT 1: Extraer 52 cartas de un mazo recién creado para obtener el orden inicial
+        //Extraer 52 cartas de un mazo recién creado para obtener el orden inicial
         List<Card> orderedList = drawMultipleCards(orderedDeck, 52);
 
-        // ASSERT 1: El mazo debe tener 52 cartas
+        //El mazo debe tener 52 cartas
         assertEquals(52, orderedList.size(), "El mazo debe contener exactamente 52 cartas.");
 
-        // ARRANGE 2: Nuevo mazo para barajar
+        //Nuevo mazo para barajar
         Deck testDeck = new Deck();
 
-        // ACT 2: Barajar y extraer las cartas
+        //Barajar y extraer las cartas
         testDeck.shuffle();
         List<Card> shuffledList = drawMultipleCards(testDeck, 52);
 
-        // ASSERT 2: (Barajado) La lista barajada debe ser diferente del orden inicial
+        //La lista barajada debe ser diferente del orden inicial
         boolean isShuffled = false;
         for (int i = 0; i < 52; i++) {
             // Compara si la carta en la posición 'i' del mazo barajado es diferente a la
@@ -105,29 +102,23 @@ public class GameTest {
      * representación en cadena (toString).
      */
     @Test
-    void testCardEqualityAndToString() {
-        // ARRANGE
+    void testCardEquality() {
+
         Card cardA = createCard("5", "H"); // Cinco de Corazones
         Card cardB = createCard("5", "H"); // Otro Cinco de Corazones (debería ser igual)
         Card cardC = createCard("6", "H"); // Seis de Corazones (debería ser diferente)
 
-        // ASSERT - Unicidad (equals)
         assertEquals(cardA, cardB, "Dos cartas con el mismo nombre y palo deben ser iguales (equals).");
         assertNotEquals(cardA, cardC, "Dos cartas diferentes deben ser desiguales (equals).");
 
-        // ASSERT - Representación (toString)
-        // Asumiendo que toString() es razonablemente implementado para fines de depuración
+
         assertTrue(cardA.toString().contains("5"), "La representación de la carta debe contener su nombre (5).");
         assertTrue(cardA.toString().contains("H"), "La representación de la carta debe contener su palo (H).");
     }
 
-    // -------------------------------------------------------------------------
-    // PRUEBAS DE REPARTO Y GESTIÓN DE MAZO (Originales y Corregidas)
-    // -------------------------------------------------------------------------
-
     @Test
     void testDealInitialHands() {
-        // ARRANGE
+
         int numBots = 2;
         int cardsToDeal = 4;
         game.setNumMachinePlayer(numBots);
@@ -135,17 +126,17 @@ public class GameTest {
         int totalPlayers = game.getAllPlayers().size(); // 1 humano + 2 bots = 3
         int initialDeckSize = game.getDeck().remainingCards(); // 52
 
-        // ACT
+
         game.dealInitialHands(cardsToDeal);
 
-        // ASSERT - Tamaño de las Manos
+        //Tamaño de las Manos
         assertEquals(cardsToDeal, game.getPlayer().getHand().size(),
                 "El jugador humano debe tener " + cardsToDeal + " cartas.");
 
         assertEquals(cardsToDeal, game.getMachinePlayers().get(0).getHand().size(),
                 "El bot 1 debe tener " + cardsToDeal + " cartas.");
 
-        // ASSERT - Disminución del Mazo
+        //Disminución del Mazo
         int totalCardsDealt = totalPlayers * cardsToDeal; // 3 * 4 = 12
         int expectedRemaining = initialDeckSize - totalCardsDealt; // 52 - 12 = 40
 
@@ -154,8 +145,7 @@ public class GameTest {
     }
 
     @Test
-    void testEvaluateCardEffect_SpecialCards() {
-        // ARRANGE
+    void testEvaluateCard() {
         Card cardKing = createCard("K", "H");    // Figura -> -10
         Card cardNine = createCard("9", "D");    // Nueve -> 0
         Card cardTen = createCard("0", "C");     // Diez -> 10
@@ -180,7 +170,7 @@ public class GameTest {
     }
 
     @Test
-    void testEvaluateCardEffect_NumericCards() {
+    void testEvaluate() {
         Card cardTwo = createCard("2", "C");
         Card cardFive = createCard("5", "H");
 
