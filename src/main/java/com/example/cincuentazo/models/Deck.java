@@ -6,7 +6,11 @@ import java.util.List;
 
 public class Deck {
     private final List<Card> cards;
-    private int currentIndex = 0;
+
+    public void shuffle() {
+        // 1. Usa la utilidad de Java para barajar la lista de cartas.
+        Collections.shuffle(cards);
+    }
 
     public Deck() {
         cards = new ArrayList<>();
@@ -18,7 +22,7 @@ public class Deck {
                 int value;
                 switch (rank) {
                     case "A" -> value = 1;
-                    case "0" -> value = 10; // este era el cambio de tu rama jdsn
+                    case "0" -> value = 10;
                     case "J" -> value = 11;
                     case "Q" -> value = 12;
                     case "K" -> value = 13;
@@ -35,34 +39,28 @@ public class Deck {
         shuffle();
     }
 
-    public void shuffle() {
-        Collections.shuffle(cards);
-        currentIndex = 0;
+    public void addCard(Card card) {
+        if (card != null) {
+            this.cards.add(card);
+        }
     }
 
     public Card drawCard() {
-        if (currentIndex >= cards.size()) shuffle();
-        return cards.get(currentIndex++);
-    }
-
-    public List<Card> dealCards(int amount) {
-        List<Card> hand = new ArrayList<>();
-        for (int i = 0; i < amount; i++) {
-            hand.add(drawCard());
+        if (cards.isEmpty()) {
+            return null;
         }
-        return hand;
-    }
-
-    public int remainingCards() {
-        return cards.size() - currentIndex;
+        return cards.remove(cards.size() - 1);
     }
 
     public List<Card> getCards() {
         return cards;
     }
 
+    public int remainingCards() {
+        return cards.size();
+    }
+
     public void addToBottom(Card c) {
         cards.add(c);
     }
-
 }

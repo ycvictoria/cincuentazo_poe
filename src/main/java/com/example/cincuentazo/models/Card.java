@@ -70,6 +70,20 @@ public class Card {
         return name + " of " + suit;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Card card = (Card) o;
+        // Solo comparamos el nombre y el palo para definir la igualdad lógica
+        return Objects.equals(name, card.name) && suit == card.suit;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, suit);
+    }
+
     public Image getImage() {
         return new Image(Objects.requireNonNull(getClass().getResourceAsStream(imagePath)));
     }

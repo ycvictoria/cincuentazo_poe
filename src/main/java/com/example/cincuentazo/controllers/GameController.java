@@ -209,7 +209,7 @@ public class GameController {
         }
 
         // 1) Repartir a todos (humano + bots)
-        game.dealCards(4);
+        game.dealInitialHands();
 
         // 2) Manos visibles
         playerHand = game.getPlayer().getHand();
@@ -238,8 +238,9 @@ public class GameController {
         }
 
         // 3) Carta inicial en mesa (ahora sí, después de repartir)
-        Card tableCard = deck.drawCard();
+        Card tableCard = game.getDeck().drawCard(); // ⬅️ Usamos getDeck() para la primera carta
         showTableCard(tableCard);
+        game.cardPlayed(tableCard);
         int initialValue = game.evaluateCardEffect(tableCard, 0);
         currentSum = initialValue;
         game.setActualSum(initialValue);
@@ -273,6 +274,8 @@ public class GameController {
         if (currentSumLabel != null) {
             currentSumLabel.setText("Suma : " + currentSum);
         }
+        game.cardPlayed(selectedCard); // <-- ¡CLAVE! Mueve la anterior a discard y establece esta como la nueva lastPlayedCard.
+        currentSum = game.getActualSum();
 
         // Mover la carta seleccionada a la mesa (visual)
         showTableCard(selectedCard);
@@ -281,7 +284,7 @@ public class GameController {
         playerHand.remove(selectedCard);
 
         // Robar una carta para mantener 4
-        Card newCard = deck.drawCard();
+        Card newCard = game.drawCardForPlayer(); // <-- ¡CLAVE! Usa el método que maneja el relleno.
         if (newCard != null) {
             playerHand.add(newCard);
         }
@@ -481,7 +484,7 @@ public class GameController {
      */
     public void handleMachineDrawCard(int machineId) {
         // 1. Actualiza el Modelo (toma una carta del mazo)
-        Card newCard = deck.drawCard();
+        Card newCard = game.drawCardForPlayer(); // ⬅️ Solución: ¡El método está en Game!
         if (newCard != null) {
             game.getMachinePlayers().get(machineId - 1).addCard(newCard);
         }
