@@ -93,4 +93,3 @@ public class WelcomeController extends Stage {
         alert.showAndWait();
     }
 }
-

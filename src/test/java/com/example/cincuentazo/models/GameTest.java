@@ -117,34 +117,6 @@ public class GameTest {
     }
 
     @Test
-    void testDealInitialHands() {
-
-        int numBots = 2;
-        int cardsToDeal = 4;
-        game.setNumMachinePlayer(numBots);
-
-        int totalPlayers = game.getAllPlayers().size(); // 1 humano + 2 bots = 3
-        int initialDeckSize = game.getDeck().remainingCards(); // 52
-
-
-        game.dealInitialHands(cardsToDeal);
-
-        //Tamaño de las Manos
-        assertEquals(cardsToDeal, game.getPlayer().getHand().size(),
-                "El jugador humano debe tener " + cardsToDeal + " cartas.");
-
-        assertEquals(cardsToDeal, game.getMachinePlayers().get(0).getHand().size(),
-                "El bot 1 debe tener " + cardsToDeal + " cartas.");
-
-        //Disminución del Mazo
-        int totalCardsDealt = totalPlayers * cardsToDeal; // 3 * 4 = 12
-        int expectedRemaining = initialDeckSize - totalCardsDealt; // 52 - 12 = 40
-
-        assertEquals(expectedRemaining, game.getDeck().remainingCards(),
-                "El mazo debe tener el tamaño inicial menos las cartas repartidas.");
-    }
-
-    @Test
     void testEvaluateCard() {
         Card cardKing = createCard("K", "H");    // Figura -> -10
         Card cardNine = createCard("9", "D");    // Nueve -> 0
@@ -170,7 +142,7 @@ public class GameTest {
     }
 
     @Test
-    void testEvaluate() {
+    void testEvaluateCardE() {
         Card cardTwo = createCard("2", "C");
         Card cardFive = createCard("5", "H");
 

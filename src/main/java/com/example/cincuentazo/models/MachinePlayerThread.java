@@ -123,4 +123,4 @@ public class MachinePlayerThread extends Thread {
         // Si es null, la máquina debe ser eliminada[cite: 109].
         return bestCard;
     }
-    }
+}

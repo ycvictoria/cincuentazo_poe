@@ -89,7 +89,7 @@ public class GameController {
         }
 
         // Desactivar el botón de reinicio al principio
-       // btnNewGame.setDisable(true);
+        // btnNewGame.setDisable(true);
 
     }
 
@@ -210,7 +210,7 @@ public class GameController {
         }
 
         // 1) Repartir a todos (humano + bots)
-        game.dealInitialHands();
+        game.dealCards(4);
 
         // 2) Manos visibles
         playerHand = game.getPlayer().getHand();
@@ -253,9 +253,8 @@ public class GameController {
         }
 
         // 3) Carta inicial en mesa (ahora sí, después de repartir)
-        Card tableCard = game.getDeck().drawCard(); // ⬅️ Usamos getDeck() para la primera carta
+        Card tableCard = deck.drawCard();
         showTableCard(tableCard);
-        game.cardPlayed(tableCard);
         int initialValue = game.evaluateCardEffect(tableCard, 0);
         currentSum = initialValue;
         game.setActualSum(initialValue);
@@ -289,8 +288,6 @@ public class GameController {
         if (currentSumLabel != null) {
             currentSumLabel.setText("Suma : " + currentSum);
         }
-        game.cardPlayed(selectedCard); // <-- ¡CLAVE! Mueve la anterior a discard y establece esta como la nueva lastPlayedCard.
-        currentSum = game.getActualSum();
 
         // Mover la carta seleccionada a la mesa (visual)
         showTableCard(selectedCard);
@@ -299,7 +296,7 @@ public class GameController {
         playerHand.remove(selectedCard);
 
         // Robar una carta para mantener 4
-        Card newCard = game.drawCardForPlayer(); // <-- ¡CLAVE! Usa el método que maneja el relleno.
+        Card newCard = deck.drawCard();
         if (newCard != null) {
             playerHand.add(newCard);
         }
@@ -501,10 +498,18 @@ public class GameController {
      * Método llamado por el hilo para tomar carta y pasar el turno (en Platform.runLater).
      */
     public void handleMachineDrawCard(int machineId) {
-        // 1. Actualiza el Modelo (toma una carta del mazo)
-        Card newCard = game.drawCardForPlayer(); // ⬅️ Solución: ¡El método está en Game!
-        if (newCard != null) {
-            game.getMachinePlayers().get(machineId - 1).addCard(newCard);
+
+        // 1. OBTENER LA INSTANCIA del jugador usando el índice DINÁMICO
+        Player currentPlayer = game.getMachinePlayers().get(machineId - 1);
+
+        // 2. OBTENER EL CONTENEDOR VISUAL y la POSICIÓN usando la INSTANCIA FIJA
+        Pane container = playerContainerMap.get(currentPlayer);
+        Integer fixedPosition = playerPositionMap.get(currentPlayer);
+
+        if (container == null || fixedPosition == null) {
+            // Si hay error de mapeo, saltamos el turno y pasamos al siguiente.
+            startNextTurn();
+            return;
         }
 
         // 3. Dirección según la POSICIÓN FIJA (1, 2, 3)
@@ -737,12 +742,12 @@ public class GameController {
     private void animateCardFromPaneToDeck( Card card,String direction, Pane pane,Runnable onFinished) {
         // 1. Crear ImageView temporal con la imagen de la carta
         ImageView temp_cardView = new ImageView(card.getImage());
-       // ImageView temp_cardView = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png"))));
+        // ImageView temp_cardView = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/cincuentazo/cards/back.png"))));
         temp_cardView.setFitWidth(90);
         temp_cardView.setFitHeight(130);
 
         // 2. Obtener posición global del stackCardsLeftBox
-      //  Bounds bounds = stackCardsLeftBox.localToScene(stackCardsBox.getBoundsInLocal());
+        //  Bounds bounds = stackCardsLeftBox.localToScene(stackCardsBox.getBoundsInLocal());
         Bounds bounds = pane.localToScene(pane.getBoundsInLocal());
         // 3. Posicionarlo sobre el mazo
         temp_cardView.setLayoutX(bounds.getMinX());

@@ -9,7 +9,7 @@ public class PlayerTest {
 
     @Test
     void testInitialization() {
-        // Iniciamos parametros para la prueba
+        // Iniciamos datos para la prueba
         String testName = "Ricardo";
         boolean isHuman = true;
         Player player = new Player(testName, isHuman);
